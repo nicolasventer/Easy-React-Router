@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "sources": ["..\\src\\routes\\about.tsx"],
+  "sourcesContent": [
+    "export const About = () => <div>About</div>;\r\n"
+  ],
+  "mappings": "qEAAa,EAAQ,IAAM,SAAY,MAAZ,wCAAY",
+  "debugId": "560489BD6B58F8B964756E2164756E21",
+  "names": []
+}

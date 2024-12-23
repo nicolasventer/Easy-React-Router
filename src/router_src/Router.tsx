@@ -1,0 +1,275 @@
+/* eslint-disable no-mixed-spaces-and-tabs */
+import { batch, signal, type ReadonlySignal } from "@preact/signals";
+import { type ComponentPropsWithoutRef, type ReactNode } from "react";
+import { flushSync } from "react-dom";
+import { LazySingleLoaderReturn } from "./lazyLoader";
+import { MultiIf } from "./MultiIf";
+import { useReact } from "./useReact";
+
+type SplitPath<T extends string, Prefix extends ":" | "?" | "/" | "" = ""> = T extends `${infer U}:${infer V}`
+	? SplitPath<U, Prefix> | SplitPath<V, ":">
+	: T extends `${infer U}?${infer V}`
+	? SplitPath<U, Prefix> | SplitPath<V, "?">
+	: T extends `${infer U}/${infer V}`
+	? SplitPath<U, Prefix> | SplitPath<V, "/">
+	: T extends ``
+	? never
+	: `${Prefix}${T}`;
+
+type RouteParams_<T extends string> = (SplitPath<T> & `:${string}` extends never
+	? {}
+	: {
+			[K in SplitPath<T> & `:${string}` extends `:${infer L}` ? L : never]: string;
+	  }) &
+	(SplitPath<T> & `?${string}` extends never
+		? {}
+		: {
+				[K in SplitPath<T> & `?${string}` extends `?${infer L}` ? L : never]?: string;
+		  });
+
+type Routes<T extends string> = Record<T, LazySingleLoaderReturn<() => ReactNode>>;
+
+export type RouteParams<RoutePath extends string> = RouteParams_<RoutePath>;
+
+type PublicRoutePath<RoutePath extends string> = RoutePath extends "/"
+	? "/"
+	: RoutePath extends `${infer _}/`
+	? never
+	: RoutePath;
+
+type BuildLinkParams<RoutePath extends string> = keyof RouteParams<RoutePath> extends never
+	? [path: RoutePath]
+	: [path: RoutePath, params: RouteParams<RoutePath>];
+
+export type LinkProps<RoutePath extends string> = keyof RouteParams<RoutePath> extends never
+	? { path: PublicRoutePath<RoutePath>; params?: {} }
+	: { path: PublicRoutePath<RoutePath>; params: RouteParams<RoutePath> };
+
+type RoutePathWithSubPaths<RoutePath extends string> = {
+	[K in RoutePath]: K extends "/"
+		? K
+		: K extends `${infer _}/`
+		? never
+		: RoutePath extends `${K}${infer U}`
+		? U extends ""
+			? never
+			: K
+		: never;
+}[RoutePath];
+
+/**
+ * Class that handles routing in a React app.
+ * @template RoutePath The type of the route paths.
+ */
+export class Router<RoutePath extends string> {
+	private routerBaseRoute = "";
+	private useRouteTransition_ = true;
+	private currentRoute_ = signal<RoutePath>();
+	private notFoundRoute_ = signal<RoutePath>();
+	private routeParams_ = signal<RouteParams<RoutePath> | {}>({});
+	// routes sorted by increasing length and then by decreasing ending slash
+	private sortedRoutes: {
+		conditionFn: (p: PublicRoutePath<RoutePath>, subPath: PublicRoutePath<RoutePath>) => boolean;
+		Then: () => ReactNode;
+	}[];
+	private routeRegexes: { path: RoutePath; regex: RegExp; keys: string[]; optionalKeys: string[] }[];
+
+	constructor(private routes: Routes<RoutePath>, private notFoundRoutes: Partial<Routes<RoutePathWithSubPaths<RoutePath>>>) {
+		this.sortedRoutes = Object.entries(routes)
+			.sort(([a], [b]) => a.length - b.length)
+			.sort(([a], [b]) => Number(a.endsWith("/")) - Number(b.endsWith("/")))
+			.map(([path, loader]) => ({
+				conditionFn: (p, subPath) => {
+					if (subPath !== "/" && path === "/") return p === "/";
+					return p && subPath !== path && `${p}/`.startsWith(path);
+				},
+				Then: (loader as Routes<RoutePath>[RoutePath]).Component,
+			}));
+		this.routeRegexes = Object.keys(routes)
+			.sort((a, b) => a.length - b.length)
+			.sort((a, b) => Number(a.endsWith("/")) - Number(b.endsWith("/")))
+			.map((path) => ({
+				path: path as RoutePath,
+				regex: new RegExp(
+					`^${path
+						// Replace :[^/]* with ([^/]+)
+						.replace(/:[^/]*$/, "([^/]+)")
+						// Replace start ? with /?
+						.replace(/^\?/, "/?")
+						// Replace ?.* with nothing
+						.replace(/\?.*$/, "")}$`
+				),
+				keys: path.match(/:([^/]+)/g)?.map((s) => s.slice(1)) ?? [],
+				optionalKeys: path.match(/\?([^/?]+)/g)?.map((s) => s.slice(1)) ?? [],
+			}));
+		window.addEventListener("popstate", () => this.updateCurrentRoute());
+	}
+
+	/** Hook need in React that should be called in the Main Layout component if its render depends on current route or loading state. */
+	useRoutes = () => {
+		useReact(this.currentRoute_);
+		useReact(this.notFoundRoute_);
+		useReact(this.routeParams_);
+		// eslint-disable-next-line react-hooks/rules-of-hooks
+		for (const route of Object.values(this.routes)) useReact((route as LazySingleLoaderReturn<() => ReactNode>).loadingState);
+		return null;
+	};
+
+	/** Sets the base route of the router, should be called in the root file of the app (that call render and import the Main Layout component). */
+	setRouterBaseRoute = (value: string) => {
+		this.routerBaseRoute = value;
+		this.updateCurrentRoute();
+	};
+
+	/** Sets if the router should use transitions when navigating to a new route. */
+	setUseRouteTransition = (value: boolean) => (this.useRouteTransition_ = value);
+
+	/** Updates the current route based on the current URL. It is called automatically when the app starts and when {@link navigateToRouteFn} is called. */
+	updateCurrentRoute = () => {
+		const path = window.location.pathname.replace(this.routerBaseRoute, "");
+		let routeRegex = this.routeRegexes.find(({ regex }) => regex.test(path));
+		if (window.location.search === "" && routeRegex?.optionalKeys.length !== 0) {
+			const newRouteRegex = this.routeRegexes.find(({ regex, optionalKeys }) => optionalKeys.length === 0 && regex.test(path));
+			if (newRouteRegex) routeRegex = newRouteRegex;
+		}
+		if (!routeRegex) {
+			const sortedSubPathArray = Object.keys(this.routes)
+				.sort((a, b) => b.length - a.length)
+				.filter((a) => a === "/" || !a.endsWith("/"));
+			const sortedSubPath = sortedSubPathArray.find((subPath) => path.startsWith(subPath));
+			this.currentRoute_.value = undefined;
+			this.notFoundRoute_.value = sortedSubPath as RoutePath;
+			this.routeParams_.value = {};
+			return;
+		}
+		this.currentRoute_.value = routeRegex.path;
+		this.notFoundRoute_.value = undefined;
+		const params = path.match(routeRegex.regex)!.slice(1);
+		const routeParams = {} as any;
+		routeRegex.keys.forEach((key, i) => (routeParams[key] = params[i]));
+		const searchParams = new URLSearchParams(window.location.search);
+		searchParams.forEach((value, key) => (routeParams[key] = value));
+		this.routeParams_.value = routeParams ?? {};
+	};
+
+	/** The current route of the app. It is set to undefined if the route is not found (see {@link notFoundRoute}). */
+	currentRoute = this.currentRoute_ as ReadonlySignal<PublicRoutePath<RoutePath>>;
+
+	/** The route that is displayed when the current route is not found. */
+	notFoundRoute = this.notFoundRoute_ as ReadonlySignal<PublicRoutePath<RoutePath>>;
+
+	/** The parameters of the current route. */
+	getRouteParams = <T extends PublicRoutePath<RoutePath>>(_: T) => this.routeParams_ as ReadonlySignal<RouteParams<T>>;
+
+	/** Whether the current route is visible. */
+	isRouteVisible = <T extends PublicRoutePath<RoutePath>>(path: T) =>
+		path === "/" || path === "//"
+			? (this.currentRoute_.value ?? this.notFoundRoute_.value) === "/"
+			: (this.currentRoute_.value ?? this.notFoundRoute_.value)?.startsWith(path);
+
+	/** Whether the current route is loading. */
+	isRouteLoading = (path: PublicRoutePath<RoutePath>) =>
+		path !== "/" && this.routes[path as RoutePath]?.loadingState.value === "loading";
+
+	/** Whether the current route is loaded. */
+	isRouteLoaded = (path: PublicRoutePath<RoutePath>) =>
+		path === "/" || this.routes[path as RoutePath]?.loadingState.value === "loaded";
+
+	/** Builds a link to a route. */
+	buildRouteLink = <T extends PublicRoutePath<RoutePath>>(...params: BuildLinkParams<T>) => {
+		const [path, p] = params;
+		if (!p) return `${this.routerBaseRoute}${path}`;
+		const routeRegex = this.routeRegexes.find(({ path: p }) => p === (path as unknown as RoutePath));
+		if (!routeRegex) return `${this.routerBaseRoute}${path}`; // Should never happen
+		let result: string = path;
+		for (const key of routeRegex.keys) {
+			const value = p[key as keyof typeof p] as string | undefined;
+			if (!value) throw new Error(`Missing param ${key}`);
+			result = result.replace(`:${key}`, encodeURIComponent(value));
+		}
+		const searchParams = new URLSearchParams();
+		for (const key of routeRegex.optionalKeys) {
+			const value = p[key as keyof typeof p] as string | undefined;
+			if (value) searchParams.set(key, value);
+			result = result.replace(`?${key}`, "");
+		}
+		if (result === "") result = "/";
+		const search = searchParams.toString();
+		if (search) result += `?${search}`;
+		return `${this.routerBaseRoute}${result}`;
+	};
+
+	/**
+	 * Starts loading a route if it is not already loaded.
+	 * @param path The path of the route to load.
+	 * @returns A function that starts loading the route and returns a promise that resolves when the route is loaded.
+	 */
+	loadRouteFn =
+		<T extends PublicRoutePath<RoutePath>>(path: T) =>
+		() =>
+			this.routes[path as unknown as RoutePath]?.load();
+
+	/**
+	 * Navigates to a route.
+	 * @param params The path and parameters of the route to navigate to.
+	 * @returns A function that navigates to the route using the current route transition setting.
+	 */
+	navigateToRouteFn =
+		<T extends PublicRoutePath<RoutePath>>(...params: BuildLinkParams<T>) =>
+		(ev?: Event) => {
+			ev?.preventDefault();
+			const navigateFn = () => {
+				const [path, p] = params;
+				batch(() => {
+					this.currentRoute_.value = path as unknown as RoutePath;
+					this.routeParams_.value = (p as unknown as RouteParams<RoutePath>) ?? {};
+				});
+				const link = this.buildRouteLink(...(params as BuildLinkParams<T>));
+				const link2 = link === "//" ? "/" : link; // this is a hack
+				window.history.pushState({}, "", link2 || "/");
+			};
+			if (this.useRouteTransition_) document.startViewTransition(() => flushSync(navigateFn));
+			else navigateFn();
+		};
+
+	/** The component that renders a link to a route. */
+	RouteLink = <T extends PublicRoutePath<RoutePath>>({
+		path,
+		params,
+		children,
+		...props
+	}: LinkProps<T> & ComponentPropsWithoutRef<"a">) => (
+		<a
+			{...props}
+			href={this.buildRouteLink(...([path, params] as unknown as BuildLinkParams<T>))}
+			onClick={this.navigateToRouteFn(...([path, params] as unknown as BuildLinkParams<T>))}
+		>
+			{children}
+		</a>
+	);
+
+	/**
+	 * The component whose render depends on the current route.
+	 * @param params
+	 * @param params.subPath The subpath of the router to render, i.e. the path of the route layout.
+	 * @returns The component that renders the current route.
+	 */
+	RouterRender = ({ subPath }: { subPath: RoutePathWithSubPaths<PublicRoutePath<RoutePath>> }) => (
+		<>
+			{this.useRoutes()}
+			<MultiIf
+				branches={this.sortedRoutes.map(({ conditionFn, Then }) => ({
+					condition: conditionFn(
+						this.currentRoute.value ?? (this.notFoundRoute_.value === subPath ? undefined : this.notFoundRoute_.value),
+						subPath
+					),
+					then: <Then />,
+				}))}
+				else={<this.NotFoundRouteRender subPath={subPath} />}
+			/>
+		</>
+	);
+
+	private NotFoundRouteRender = ({ subPath }: { subPath: RoutePathWithSubPaths<PublicRoutePath<RoutePath>> }) =>
+		this.notFoundRoutes[subPath]?.Component() ?? null;
+}
