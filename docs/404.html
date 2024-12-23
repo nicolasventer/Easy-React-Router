@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		NOT FOUND
+		<script>
+			var oldPath = window.location.pathname;
+			window.location.pathname = "/Easy-React-Router";
+		</script>
+		<script defer>
+			window.history.pushState({}, "", oldPath);
+		</script>
+	</body>
+</html>
