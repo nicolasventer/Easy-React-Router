@@ -7,25 +7,25 @@ import { LazySingleLoaderReturn } from "./lazyLoader";
 import { MultiIf } from "./MultiIf";
 import { useReact } from "./useReact";
 
-type SplitSlashOrDollar<T extends string, Prefix extends "$" | "/$" | "/" | "" = ""> = T extends `${infer U}/$${infer V}`
-	? SplitSlashOrDollar<U, Prefix> | SplitSlashOrDollar<V, "/$">
+type SplitSlashOrDollar<T extends string, Prefix extends ":" | "/:" | "/" | "" = ""> = T extends `${infer U}/:${infer V}`
+	? SplitSlashOrDollar<U, Prefix> | SplitSlashOrDollar<V, "/:">
 	: T extends `${infer U}/${infer V}`
 	? SplitSlashOrDollar<U, Prefix> | SplitSlashOrDollar<V, "/">
-	: T extends `${infer U}$${infer V}`
-	? SplitSlashOrDollar<U, Prefix> | SplitSlashOrDollar<V, "$">
+	: T extends `${infer U}:${infer V}`
+	? SplitSlashOrDollar<U, Prefix> | SplitSlashOrDollar<V, ":">
 	: T extends ``
 	? never
 	: `${Prefix}${T}`;
 
-type RouteParams_<T extends string> = (SplitSlashOrDollar<T> & `/$${string}` extends never
+type RouteParams_<T extends string> = (SplitSlashOrDollar<T> & `/:${string}` extends never
 	? {}
 	: {
-			[K in SplitSlashOrDollar<T> & `/$${string}` extends `/$${infer L}` ? L : never]: string;
+			[K in SplitSlashOrDollar<T> & `/:${string}` extends `/:${infer L}` ? L : never]: string;
 	  }) &
-	(SplitSlashOrDollar<T> & `$${string}` extends never
+	(SplitSlashOrDollar<T> & `:${string}` extends never
 		? {}
 		: {
-				[K in SplitSlashOrDollar<T> & `$${string}` extends `$${infer L}` ? L : never]?: string;
+				[K in SplitSlashOrDollar<T> & `:${string}` extends `:${infer L}` ? L : never]?: string;
 		  });
 
 type Routes<T extends string> = Record<T, LazySingleLoaderReturn<() => ReactNode>>;
@@ -86,22 +86,26 @@ export class Router<RoutePath extends string> {
 				},
 				Then: (loader as Routes<RoutePath>[RoutePath]).Component,
 			}));
-		this.routeRegexes = Object.keys(routes).map((path) => ({
-			path: path as RoutePath,
-			regex: new RegExp(
-				`^${path
-					// Replace /$[^/]* with /([^/]+)
-					.replace(/\/\$[^/]*$/, "/([^/]+)")
-					// Replace $.* with nothing
-					.replace(/\$.*$/, "")}$`
-			),
-			keys: path.match(/\/\$([^/]+)/g)?.map((s) => s.slice(2)) ?? [],
-			optionalKeys:
-				path
-					.match(/\/?\$([^/$]+)/g)
-					?.filter((s) => s[0] !== "/")
-					.map((s) => s.slice(1)) ?? [],
-		}));
+		this.routeRegexes = Object.keys(routes)
+			.sort((a, b) => a.length - b.length)
+			.sort((a, b) => Number(a.endsWith("/")) - Number(b.endsWith("/")))
+			.map((path) => ({
+				path: path as RoutePath,
+				regex: new RegExp(
+					`^${path
+						// Replace /:[^/]* with /([^/]+)
+						.replace(/\/:[^/]*$/, "/([^/]+)")
+						// Replace :.* with nothing // TODO: fix this
+						.replace(/:.*$/, "")}$`
+				),
+				keys: path.match(/\/:([^/]+)/g)?.map((s) => s.slice(2)) ?? [],
+				optionalKeys:
+					path
+						.match(/\/?:([^/:]+)/g)
+						?.filter((s) => s[0] !== "/")
+						.map((s) => s.slice(1)) ?? [],
+			}));
+		console.log("this.routeRegexes:", this.routeRegexes);
 		window.addEventListener("popstate", () => this.updateCurrentRoute());
 	}
 
@@ -167,13 +171,13 @@ export class Router<RoutePath extends string> {
 		for (const key of routeRegex.keys) {
 			const value = p[key as keyof typeof p] as string | undefined;
 			if (!value) throw new Error(`Missing param ${key}`);
-			result = result.replace(`$${key}`, encodeURIComponent(value));
+			result = result.replace(`:${key}`, encodeURIComponent(value));
 		}
 		const searchParams = new URLSearchParams();
 		for (const key of routeRegex.optionalKeys) {
 			const value = p[key as keyof typeof p] as string | undefined;
 			if (value) searchParams.set(key, value);
-			result = result.replace(`$${key}`, "");
+			result = result.replace(`:${key}`, "");
 		}
 		const search = searchParams.toString();
 		if (search) result += `?${search}`;

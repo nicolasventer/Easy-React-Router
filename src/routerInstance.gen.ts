@@ -1,4 +1,4 @@
-// 9951f75f43df45f9449921b808bc45158690d73dec7d8b9bdcbdee16e89c3546
+// e50b3d2907bea197c92d6efd7a0bd895dc04d0262f58ceb384320751a8e45bc9
 import { checkValidRoute } from "./router_src/checkValidRoute";
 import { lazySingleLoader } from "./router_src/lazyLoader";
 import { Router } from "./router_src/Router";
@@ -24,10 +24,10 @@ export const {
 	{
 		[checkValidRoute("/about")]: lazySingleLoader(() => import("./routes/about"), "About"),
 		[checkValidRoute("/hugePage")]: lazySingleLoader(() => import("./routes/hugePage"), "HugePage"),
-		[checkValidRoute("/$id")]: lazySingleLoader(() => import("./routes/index.$id"), "IndexWithId"),
+		[checkValidRoute(":id")]: lazySingleLoader(() => import("./routes/index$id"), "IndexWithId"),
 		[checkValidRoute("//")]: lazySingleLoader(() => import("./routes/index.index"), "Home"),
 		[checkValidRoute("/")]: lazySingleLoader(() => import("./routes/index"), "MainLayout"),
-		[checkValidRoute("/posts/$id")]: lazySingleLoader(() => import("./routes/posts.$id"), "PostWithId"),
+		[checkValidRoute("/posts/:id")]: lazySingleLoader(() => import("./routes/posts.$id"), "PostWithId"),
 		[checkValidRoute("/posts/")]: lazySingleLoader(() => import("./routes/posts.index.index"), "PostWithoutId"),
 		[checkValidRoute("/posts")]: lazySingleLoader(() => import("./routes/posts"), "PostsLayout"),
 	},

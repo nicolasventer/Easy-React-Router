@@ -20,12 +20,12 @@ const navigationItem = <T extends RouterPathType>(title: string, path: T, params
 
 const navigationItems = [
 	navigationItem("Home", "/", {}),
-	navigationItem("Home with id", "/$id", { id: "abc" }),
+	navigationItem("Home with id", ":id", { id: "abc" }),
 	navigationItem("Posts", "/posts", {}),
 	navigationItem("About", "/about", {}),
 	navigationItem("HugePage", "/hugePage", {}),
 	navigationItem("InvalidPage", "/invalid" as "/", {}),
-] as NavigationItem<RouterPathType>[];
+] as const;
 
 // @routeExport
 export const MainLayout = () => (
@@ -36,7 +36,7 @@ export const MainLayout = () => (
 				<RouteLink
 					key={title}
 					path={path}
-					params={params}
+					params={params as any}
 					style={{
 						color:
 							path === ("/invalid" as "/")
@@ -49,7 +49,7 @@ export const MainLayout = () => (
 								? "green"
 								: "black",
 					}}
-					onMouseEnter={loadRouteFn(path)}
+					onMouseEnter={loadRouteFn(path === ("/invalid" as "/") ? "/" : path)}
 				>
 					<h3>{title}</h3>
 				</RouteLink>

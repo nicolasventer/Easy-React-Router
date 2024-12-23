@@ -11,9 +11,9 @@ export const PostsLayout = () => (
 				{Array.from({ length: 10 }).map((_, i) => (
 					<RouteLink
 						key={i}
-						path="/posts/$id"
+						path="/posts/:id"
 						params={{ id: i.toString() }}
-						style={{ color: getRouteParams("/posts/$id").value.id === i.toString() ? "blue" : "black" }}
+						style={{ color: getRouteParams("/posts/:id").value.id === i.toString() ? "blue" : "black" }}
 					>
 						Post {i}
 					</RouteLink>
