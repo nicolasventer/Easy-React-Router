@@ -31,16 +31,18 @@ This table shows the equivalence between routes and their respective path.
 | File path                         | Route Path                         | Example                            |
 | --------------------------------- | ---------------------------------- | ---------------------------------- |
 | `/` `index.tsx`                   | layout for `/`                     | `/`                                |
-| `/` `_slash.tsx`                  | `//`                               | _(hidden path)_                    |
+| `/` `index.index.tsx`             | `//`                               | _(hidden path)_                    |
 | `/` `/.tsx`                       | `//`                               | _(hidden path)_                    |
 | `/` `$id.tsx`                     | `:id` _(`id` is optional)_         | `/?id=abc`, `/?id=123`, `/`        |
-| `/` `_slash$id.tsx`               | `/:id` _(`id` is mandatory)_       | `/abc`, `/123`                     |
-| `/` `_notFound.tsx`               | not found at `/`                   | _(automatic path)_                 |
+| `/` `index.$id.tsx`               | `/:id` _(`id` is mandatory)_       | `/abc`, `/123`                     |
+| `/` `404.tsx`                     | not found at `/`                   | _(automatic path)_                 |
 | `/` `(ignored-path).about.tsx`    | `/about`                           | `/about`                           |
 | `/` `(ignored-path)/` `about.tsx` | `/about`                           | `/about`                           |
 | `/` `posts.tsx`                   | layout for `/posts`                | `/posts`                           |
 | `/` `posts/` `index.tsx`          | layout for `/posts`                | `/posts`                           |
-| `/` `posts/` `_slash.tsx`         | `/posts//`                         | _(hidden path)_                    |
+| `/` `posts/` `index.index.tsx`    | `/posts//`                         | _(hidden path)_                    |
 | `/` `posts$id.tsx`                | `/posts:id` _(`id` is optional)_   | `/posts/?id=abc`, `/posts/?id=123` |
 | `/` `posts/` `$id.tsx`            | `/posts/:id` _(`id` is mandatory)_ | `/posts/abc`, `/posts/123`         |
-| `/` `posts/` `_notFound.tsx`      | not found at `/posts`              | _(automatic path)_                 |
+| `/` `posts/` `404.tsx`            | not found at `/posts`              | _(automatic path)_                 |
+
+_If you weirdly need `404` in your path, create a folder named `404`._

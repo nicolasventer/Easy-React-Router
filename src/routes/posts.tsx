@@ -1,3 +1,4 @@
+import { clientEnv } from "../clientEnv";
 import { currentRoute, getRouteParams, RouteLink, RouterRender } from "../routerInstance.gen";
 
 export const PostsLayout = () => (
@@ -17,6 +18,7 @@ export const PostsLayout = () => (
 						Post {i}
 					</RouteLink>
 				))}
+				<a href={`${clientEnv.BASE_URL}/posts/0/invalid`}>Invalid post</a>
 			</div>
 		</div>
 		<div>

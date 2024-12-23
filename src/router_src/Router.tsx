@@ -30,7 +30,7 @@ type RouteParams_<T extends string> = (SplitSlashOrDollar<T> & `/$${string}` ext
 
 type Routes<T extends string> = Record<T, LazySingleLoaderReturn<() => ReactNode>>;
 
-type RouteParams<RoutePath extends string> = RouteParams_<RoutePath>;
+export type RouteParams<RoutePath extends string> = RouteParams_<RoutePath>;
 
 type PublicRoutePath<RoutePath extends string> = RoutePath extends "/"
 	? "/"

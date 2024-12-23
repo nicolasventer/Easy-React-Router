@@ -113,7 +113,7 @@ for (const fileObj of fs.readdirSync(ROUTES_DIR, { recursive: true, withFileType
 	}
 	parseResult.usedExport = exportName;
 
-	parseResult.isNotFound = filePath.endsWith("_notFound.tsx");
+	parseResult.isNotFound = filePath.endsWith("404.tsx");
 
 	// get route path
 	parseResult.routePath = filePath
@@ -123,12 +123,12 @@ for (const fileObj of fs.readdirSync(ROUTES_DIR, { recursive: true, withFileType
 		.replace(/\./g, "/")
 		// replace all /(.*) with /
 		.replace(/\/\(.*\)/g, "")
-		// replace end /_slash with /
-		.replace(/\/_slash$/, "/")
-		// remove end /_notFound
-		.replace(/\/_notFound$/, "")
-		// remove end /index
-		.replace(/\/index$/, "");
+		// remove end /404
+		.replace(/\/404$/, "")
+		// remove one /index
+		.replace(/\/index/, "")
+		// replace all /index with /
+		.replace(/\/index/g, "/");
 
 	// add / if path is empty or /
 	if (parseResult.routePath.length <= 1) parseResult.routePath += "/";

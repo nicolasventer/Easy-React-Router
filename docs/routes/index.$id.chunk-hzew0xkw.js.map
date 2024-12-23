@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "sources": ["..\\src\\routes\\index.$id.tsx"],
+  "sourcesContent": [
+    "import { getRouteParams } from \"../routerInstance.gen\";\r\n\r\nexport const IndexWithId = () => <div>Index with id: {getRouteParams(\"/$id\").value.id}</div>;\r\n"
+  ],
+  "mappings": "uLAEa,GAAc,KAAM,UAAuD,MAAvD,UAAuD,CAAvD,kBAAqB,EAAe,MAAM,EAAE,MAAM,KAAlD,qBAAuD",
+  "debugId": "154D9D01B972FF0A64756E2164756E21",
+  "names": []
+}

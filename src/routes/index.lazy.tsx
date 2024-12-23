@@ -12,28 +12,20 @@ import {
 
 type NavigationItem<T extends RouterPathType> = { title: string; path: T; params: RouterParamsType<T> };
 
-const navigationItems: NavigationItem<RouterPathType>[] = [
-	{
-		title: "Home",
-		path: "/",
-		params: {},
-	},
-	{
-		title: "Posts",
-		path: "/posts",
-		params: {},
-	},
-	{
-		title: "About",
-		path: "/about",
-		params: {},
-	},
-	{
-		title: "HugePage",
-		path: "/hugePage",
-		params: {},
-	},
-];
+const navigationItem = <T extends RouterPathType>(title: string, path: T, params: RouterParamsType<T>): NavigationItem<T> => ({
+	title,
+	path,
+	params,
+});
+
+const navigationItems = [
+	navigationItem("Home", "/", {}),
+	navigationItem("Home with id", "/$id", { id: "abc" }),
+	navigationItem("Posts", "/posts", {}),
+	navigationItem("About", "/about", {}),
+	navigationItem("HugePage", "/hugePage", {}),
+	navigationItem("InvalidPage", "/invalid" as "/", {}),
+] as NavigationItem<RouterPathType>[];
 
 // @routeExport
 export const MainLayout = () => (
@@ -46,7 +38,16 @@ export const MainLayout = () => (
 					path={path}
 					params={params}
 					style={{
-						color: isRouteVisible(path) ? "red" : isRouteLoading(path) ? "orange" : isRouteLoaded(path) ? "green" : "black",
+						color:
+							path === ("/invalid" as "/")
+								? undefined
+								: isRouteVisible(path)
+								? "red"
+								: isRouteLoading(path)
+								? "orange"
+								: isRouteLoaded(path)
+								? "green"
+								: "black",
 					}}
 					onMouseEnter={loadRouteFn(path)}
 				>
