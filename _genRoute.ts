@@ -40,8 +40,11 @@ for (const fileObj of fs.readdirSync(ROUTES_DIR, { recursive: true, withFileType
 		// replace \ with /
 		.replace(/\\/g, "/");
 
-	// if filename is (.*).ts, then ignore it
+	// if filename is (.*).tsx, then ignore it
 	if (fileObj.name.match(/\(.*\).tsx/)) continue;
+	// if filename ends with .lazy.tsx, then ignore it
+	if (fileObj.name.endsWith(".lazy.tsx")) continue;
+
 	const parseResult: ParseResult = { filePath };
 
 	const fileContent = await Bun.file(filePath).text();

@@ -18,7 +18,6 @@ export default defineConfig({
 	base: "./",
 	plugins: [react(), routerGenWatcher, lazyComponentWatcher],
 	build: {
-		sourcemap: true,
 		rollupOptions: {
 			output: {
 				// eslint-disable-next-line no-undef

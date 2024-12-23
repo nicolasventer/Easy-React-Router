@@ -5,9 +5,12 @@
 	"type": "module",
 	"scripts": {
 		"dev": "bun run _genClientEnv.ts && vite",
-		"build": "cross-env B_PROD=true bun run _genClientEnv.ts && tsc -b && vite build",
+		"build": "cross-env B_PROD=true bun run _genClientEnv.ts && bun run _build.ts",
+		"_build": "cross-env B_PROD=true bun run _genClientEnv.ts && tsc -b && vite build",
 		"lint": "eslint .",
-		"preview": "vite preview"
+		"preview": "vite preview",
+		"deploy": "bun run _deploy.ts",
+		"buildDeploy": "bun run build && bun run deploy"
 	},
 	"dependencies": {
 		"@preact/signals": "2.0.0",

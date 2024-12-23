@@ -27,24 +27,40 @@ const formatFile = async (filePath: string) => {
 		const fileContent = await Bun.file(filePath).text();
 		const exportPosArray = getSubTextPosArray(fileContent, "export ", true);
 
-		const exportList: string[] = [];
+		const exportList: { exportName: string; isRouteExport: boolean }[] = [];
 		let hasDefaultExport = false;
+		let isDefaultRouteExport = false;
 		for (const exportPos of exportPosArray) {
 			// get export name
 			const exportLinePos = fileContent.indexOf("\n", exportPos);
+			const exportJustBeforeLinePos = fileContent.slice(0, exportPos - 1).lastIndexOf("\n") + 1;
 			const exportLine = fileContent.slice(exportPos, exportLinePos);
+			const exportJustBeforeLine = fileContent.slice(exportJustBeforeLinePos, exportPos).trim();
+			const isRouteExport = exportJustBeforeLine === "// @routeExport";
 			const exportName = exportLine.match(/export (const|let|var|function) (\w+)/)?.[2];
-			if (exportName) exportList.push(exportName);
-			else hasDefaultExport = true;
+			if (exportName) exportList.push({ isRouteExport, exportName });
+			else {
+				hasDefaultExport = true;
+				isDefaultRouteExport = isRouteExport;
+			}
 		}
 		const notLazyFileContent = `/* eslint-disable react-refresh/only-export-components */
 import { lazyLoader } from "${relativePathToSrc}/router_src/lazyLoader";
 
 const ${fileNameNoExtNoLazy}LazyLoader = lazyLoader(() => import("./${fileNameNoExtNoLazy}.lazy"));
 export const loadingState = ${fileNameNoExtNoLazy}LazyLoader.loadingState;
-${exportList.map((exp) => `export const ${exp} = ${fileNameNoExtNoLazy}LazyLoader.getComponent("${exp}");`).join("\n")}
+${exportList
+	.map(
+		(exp) =>
+			`${exp.isRouteExport ? "// @routeExport\n" : ""}` +
+			`export const ${exp.exportName} = ${fileNameNoExtNoLazy}LazyLoader.getComponent("${exp.exportName}");`
+	)
+	.join("\n")}
 ${
-	hasDefaultExport ? `const default_ = ${fileNameNoExtNoLazy}LazyLoader.getComponent("default");\nexport default default_;` : ""
+	hasDefaultExport
+		? `${isDefaultRouteExport ? "// @routeExport\n" : ""}` +
+		  `const default_ = ${fileNameNoExtNoLazy}LazyLoader.getComponent("default");\nexport default default_;`
+		: ""
 }`;
 
 		await Bun.write(notLazyFilePath, notLazyFileContent);

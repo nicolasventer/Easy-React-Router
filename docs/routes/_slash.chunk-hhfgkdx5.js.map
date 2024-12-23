@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "sources": ["..\\src\\components\\Counter.tsx", "..\\src\\routes\\_slash.tsx"],
+  "sourcesContent": [
+    "/* eslint-disable react-refresh/only-export-components */\nimport { lazyLoader } from \"../router_src/lazyLoader\";\n\nconst CounterLazyLoader = lazyLoader(() => import(\"./Counter.lazy\"));\nexport const loadingState = CounterLazyLoader.loadingState;\nexport const Counter = CounterLazyLoader.getComponent(\"Counter\");\n",
+    "import { Counter } from \"../components/Counter\";\r\n\r\nexport const Home = () => (\r\n\t<div>\r\n\t\tHome\r\n\t\t<div>\r\n\t\t\t<Counter />\r\n\t\t</div>\r\n\t</div>\r\n);\r\n"
+  ],
+  "mappings": "2GAGA,KAAM,EAAoB,EAAW,IAAa,sDAAiB,EACtD,EAAe,EAAkB,aACjC,EAAU,EAAkB,aAAa,SAAS,iBCHlD,EAAO,IACnB,SAKE,MALF,UAKE,CALF,OAEC,SAEE,MAFF,UACC,SAAC,EAAD,wBAAS,GADV,qBAEE,IAJH,qBAKE",
+  "debugId": "5F370B47894AF95164756E2164756E21",
+  "names": []
+}

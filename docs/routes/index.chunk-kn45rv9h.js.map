@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "sources": ["..\\src\\routes\\index.tsx"],
+  "sourcesContent": [
+    "/* eslint-disable react-refresh/only-export-components */\nimport { lazyLoader } from \"../router_src/lazyLoader\";\n\nconst indexLazyLoader = lazyLoader(() => import(\"./index.lazy\"));\nexport const loadingState = indexLazyLoader.loadingState;\n// @routeExport\nexport const MainLayout = indexLazyLoader.getComponent(\"MainLayout\");\n"
+  ],
+  "mappings": "+FAGA,KAAM,EAAkB,EAAW,IAAa,wCAAe,EAClD,EAAe,EAAgB,aAE/B,EAAa,EAAgB,aAAa,YAAY",
+  "debugId": "08FFC40BF7F5B52E64756E2164756E21",
+  "names": []
+}

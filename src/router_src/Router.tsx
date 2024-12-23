@@ -158,16 +158,11 @@ export class Router<RoutePath extends string> {
 	isRouteLoaded = (path: PublicRoutePath<RoutePath>) =>
 		path === "/" || this.routes[path as RoutePath].loadingState.value === "loaded";
 
-	private print = (s: string) => {
-		console.log(s);
-		return s;
-	};
-
 	buildRouteLink = <T extends PublicRoutePath<RoutePath>>(...params: BuildLinkParams<T>) => {
 		const [path, p] = params;
-		if (!p) return this.print(`${ROUTER_BASE_ROUTE}${path}`);
+		if (!p) return `${ROUTER_BASE_ROUTE}${path}`;
 		const routeRegex = this.routeRegexes.find(({ path: p }) => p === (path as unknown as RoutePath));
-		if (!routeRegex) return this.print(`${ROUTER_BASE_ROUTE}${path}`); // Should never happen
+		if (!routeRegex) return `${ROUTER_BASE_ROUTE}${path}`; // Should never happen
 		let result: string = path;
 		for (const key of routeRegex.keys) {
 			const value = p[key as keyof typeof p] as string | undefined;
@@ -182,7 +177,7 @@ export class Router<RoutePath extends string> {
 		}
 		const search = searchParams.toString();
 		if (search) result += `?${search}`;
-		return this.print(`${ROUTER_BASE_ROUTE}${result}`);
+		return `${ROUTER_BASE_ROUTE}${result}`;
 	};
 
 	loadRouteFn =

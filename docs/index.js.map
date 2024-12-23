@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "sources": ["..\\node_modules\\react-dom\\client.js", "..\\src\\index.tsx"],
+  "sourcesContent": [
+    "'use strict';\n\nvar m = require('react-dom');\nif (process.env.NODE_ENV === 'production') {\n  exports.createRoot = m.createRoot;\n  exports.hydrateRoot = m.hydrateRoot;\n} else {\n  var i = m.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;\n  exports.createRoot = function(c, o) {\n    i.usingClientEntryPoint = true;\n    try {\n      return m.createRoot(c, o);\n    } finally {\n      i.usingClientEntryPoint = false;\n    }\n  };\n  exports.hydrateRoot = function(c, h, o) {\n    i.usingClientEntryPoint = true;\n    try {\n      return m.hydrateRoot(c, h, o);\n    } finally {\n      i.usingClientEntryPoint = false;\n    }\n  };\n}\n",
+    "import { StrictMode } from \"react\";\nimport { createRoot } from \"react-dom/client\";\nimport { MainLayout } from \"./routes/index\";\nimport \"./style.css\";\n\n// define the startViewTransition function if it does not exist (for Firefox)\nif (!document.startViewTransition)\n\tdocument.startViewTransition = (fn: () => void) => {\n\t\tconst ready = new Promise<undefined>((resolve) => resolve(undefined));\n\t\tconst finished = new Promise<undefined>((resolve) => (fn(), resolve(undefined)));\n\t\tconst updateCallbackDone = new Promise<undefined>((resolve) => resolve(undefined));\n\t\tconst skipTransition = () => {};\n\t\treturn { ready, finished, updateCallbackDone, skipTransition };\n\t};\n\ncreateRoot(document.getElementById(\"root\")!).render(\n\t<StrictMode>\n\t\t<MainLayout />\n\t</StrictMode>\n);\n"
+  ],
+  "mappings": "sNAEgB,eAKV,EAAM,qDACF,qBAAqB,CAAC,EAAG,EAAG,CAClC,EAAE,sBAAwB,GAC1B,GAAI,CACF,OAAS,aAAW,EAAG,CAAC,SACxB,CACA,EAAE,sBAAwB,KAGtB,sBAAsB,CAAC,EAAG,EAAG,EAAG,CACtC,EAAE,sBAAwB,GAC1B,GAAI,CACF,OAAS,cAAY,EAAG,EAAG,CAAC,SAC5B,CACA,EAAE,sBAAwB,KAd1B,QCPN,eACA,0BAKA,IAAK,SAAS,oBACb,SAAS,oBAAsB,CAAC,IAAmB,CAClD,IAAM,EAAQ,IAAI,QAAmB,CAAC,IAAY,EAAQ,MAAS,CAAC,EAC9D,EAAW,IAAI,QAAmB,CAAC,KAAa,EAAG,EAAG,EAAQ,MAAS,EAAE,EACzE,EAAqB,IAAI,QAAmB,CAAC,IAAY,EAAQ,MAAS,CAAC,EAEjF,MAAO,CAAE,QAAO,WAAU,qBAAoB,eADvB,IAAM,EACgC,GAG/D,aAAW,SAAS,eAAe,MAAM,CAAE,EAAE,OAC5C,SAEE,aAFF,UACC,SAAC,EAAD,wBAAY,GADb,qBAEE,CACH",
+  "debugId": "CFADD21176A969F664756E2164756E21",
+  "names": []
+}
