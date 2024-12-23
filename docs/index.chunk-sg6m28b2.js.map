@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "sources": ["..\\src\\router_src\\checkValidRoute.ts"],
+  "sourcesContent": [
+    "/**\r\n * @notExported\r\n * Type to check if the route is valid\r\n */\r\ntype ValidRoute<T extends Readonly<string>> = T extends `${infer _}?${infer _}/${infer _}` ? never : T;\r\n\r\n/** Check if the route is valid */\r\nexport const checkValidRoute = <T extends Readonly<string>>(t: ValidRoute<T>) => t;\r\n"
+  ],
+  "mappings": "AAOO,IAAM,EAAkB,CAA6B,IAAqB",
+  "debugId": "86595955AAC7E25064756E2164756E21",
+  "names": []
+}

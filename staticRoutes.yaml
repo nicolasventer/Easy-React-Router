@@ -1,0 +1,15 @@
+# Static routes
+- /about
+- /hugePage
+- /
+- /posts/3
+- /posts
+- /invalid
+
+# Dynamic routes
+# - /posts/:id is dynamic, uncomment example below to generate it
+- /posts/0
+- /posts/1
+- /posts/2
+- /posts/4
+- /posts/0/invalid

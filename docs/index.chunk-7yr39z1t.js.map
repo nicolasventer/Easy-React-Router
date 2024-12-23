@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "sources": ["..\\src\\_bProd.ts", "..\\src\\clientEnv.ts"],
+  "sourcesContent": [
+    "/** enable production mode */\nexport const B_PROD = true;",
+    "import { B_PROD } from \"./_bProd\";\r\n\r\n/** the client environment */\r\nexport type ClientEnv = {\r\n\t/** the base url */\r\n\tBASE_URL: string;\r\n};\r\n\r\n/** the client environment variables */\r\nexport const clientEnv: ClientEnv = B_PROD\r\n\t? {\r\n\t\t\tBASE_URL: \"/Easy-React-Router\",\r\n\t  }\r\n\t: {\r\n\t\t\tBASE_URL: \"\",\r\n\t  };\r\n"
+  ],
+  "mappings": "AACO,IAAM,EAAS,GCQf,IAAM,EAAuB,EACjC,CACA,SAAU,oBACV,EACA,CACA,SAAU,EACV",
+  "debugId": "1269E55E3E71B29464756E2164756E21",
+  "names": []
+}
