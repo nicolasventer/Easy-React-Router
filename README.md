@@ -46,4 +46,4 @@ This table shows the equivalence between routes and their respective path.
 | `/` `posts/` `$id.tsx`            | `/posts/:id` _(`id` is mandatory)_ | `/posts/abc`, `/posts/123`  |
 | `/` `posts/` `404.tsx`            | not found at `/posts`              | _(automatic path)_          |
 
-_If you weirdly need `/404` in your path, create a folder named `404`._
+_If you weirdly need `/404` in your path, create a folder named `404`. Same for `index`._

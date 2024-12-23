@@ -119,6 +119,8 @@ for (const fileObj of fs.readdirSync(ROUTES_DIR, { recursive: true, withFileType
 	parseResult.routePath = filePath
 		// remove ROUTES_DIR and .tsx
 		.slice(ROUTES_DIR.length, -".tsx".length)
+		// replace all /index/ with /_index/ (in order to keep it)
+		.replace(/\/index\//g, "/_index/")
 		// replace all . with /
 		.replace(/\./g, "/")
 		// replace all /(.*) with /
@@ -130,7 +132,9 @@ for (const fileObj of fs.readdirSync(ROUTES_DIR, { recursive: true, withFileType
 		// replace all /index with /
 		.replace(/\/index/g, "/")
 		// replace all $ with : // TODO: replace only /$ with /: and $ with ?
-		.replace(/\$/g, ":");
+		.replace(/\$/g, ":")
+		// replace all /_index/ with /index/
+		.replace(/\/_index\//g, "/index/");
 
 	// add / if path is empty or /
 	if (parseResult.routePath.length <= 1) parseResult.routePath += "/";
