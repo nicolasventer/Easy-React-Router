@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { clientEnv } from "./clientEnv";
 import { setRouterBaseRoute } from "./routerInstance.gen";
-import { MainLayout } from "./routes/index";
+import { MainLayout } from "./routes";
 import "./style.css";
 
 setRouterBaseRoute(clientEnv.BASE_URL);

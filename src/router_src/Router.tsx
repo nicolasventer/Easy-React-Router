@@ -1,11 +1,16 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 import { batch, signal, type ReadonlySignal } from "@preact/signals";
-import { type ComponentPropsWithoutRef, type ReactNode } from "react";
+import type { ComponentPropsWithoutRef, JSX, ReactNode } from "react";
 import { flushSync } from "react-dom";
 import { LazySingleLoaderReturn } from "./lazyLoader";
 import { MultiIf } from "./MultiIf";
 import { useReact } from "./useReact";
 
+/**
+ * @notExported
+ * @template {string} T
+ * Type to split a path into its parts.
+ */
 type SplitPath<T extends string, Prefix extends ":" | "?" | "/" | "" = ""> = T extends `${infer U}:${infer V}`
 	? SplitPath<U, Prefix> | SplitPath<V, ":">
 	: T extends `${infer U}?${infer V}`
@@ -16,6 +21,11 @@ type SplitPath<T extends string, Prefix extends ":" | "?" | "/" | "" = ""> = T e
 	? never
 	: `${Prefix}${T}`;
 
+/**
+ * @notExported
+ * @template {string} T
+ * Type to get the parameters of a route path.
+ */
 type RouteParams_<T extends string> = (SplitPath<T> & `:${string}` extends never
 	? {}
 	: {
@@ -27,24 +37,69 @@ type RouteParams_<T extends string> = (SplitPath<T> & `:${string}` extends never
 				[K in SplitPath<T> & `?${string}` extends `?${infer L}` ? L : never]?: string;
 		  });
 
-type Routes<T extends string> = Record<T, LazySingleLoaderReturn<() => ReactNode>>;
+/**
+ * @notExported
+ * @template {string} T
+ * Type to store the routes of the app. \
+ * The keys are the paths of the routes and the values are the components of the routes.
+ */
+type Routes<T extends string> = Record<T, LazySingleLoaderReturn<() => JSX.Element>>;
 
+/**
+ * @template {string} RoutePath
+ * Type of the parameters of a route path.
+ * `params` is optional if the route has no parameters.
+ * @example
+ * type A = RouteParams<"/a/:b/c?d">; // { b: string; d?: string; }
+ */
 export type RouteParams<RoutePath extends string> = RouteParams_<RoutePath>;
 
+/**
+ * @notExported
+ * @template {string} RoutePath
+ * Type to get the route path that should be accessible to the public.
+ */
 type PublicRoutePath<RoutePath extends string> = RoutePath extends "/"
 	? "/"
 	: RoutePath extends `${infer _}/`
 	? never
 	: RoutePath;
 
+/**
+ * @notExported
+ * @template {string} RoutePath
+ * Type of the parameters of the build link function. `params` is optional if the route has no parameters.
+ */
 type BuildLinkParams<RoutePath extends string> = keyof RouteParams<RoutePath> extends never
 	? [path: RoutePath]
 	: [path: RoutePath, params: RouteParams<RoutePath>];
 
+/**
+ * @template {string} RoutePath
+ * The props of the link component.
+ * `params` is optional if the route has no parameters.
+ */
 export type LinkProps<RoutePath extends string> = keyof RouteParams<RoutePath> extends never
-	? { path: PublicRoutePath<RoutePath>; params?: {} }
-	: { path: PublicRoutePath<RoutePath>; params: RouteParams<RoutePath> };
+	? {
+			/** The path of the route to link to. */
+			path: PublicRoutePath<RoutePath>;
+			/** The parameters of the route. */
+			params?: {};
+	  }
+	: {
+			/** The path of the route to link to. */
+			path: PublicRoutePath<RoutePath>;
+			/** The parameters of the route. */
+			params: RouteParams<RoutePath>;
+	  };
 
+/**
+ * @notExported
+ * @template {string} RoutePath
+ * Type to get the subpaths of a route path.
+ * @example
+ * type A = RoutePathWithSubPaths<"/a" | "/a/b/c">; // "/a"
+ */
 type RoutePathWithSubPaths<RoutePath extends string> = {
 	[K in RoutePath]: K extends "/"
 		? K
@@ -70,7 +125,7 @@ export class Router<RoutePath extends string> {
 	// routes sorted by increasing length and then by decreasing ending slash
 	private sortedRoutes: {
 		conditionFn: (p: PublicRoutePath<RoutePath>, subPath: PublicRoutePath<RoutePath>) => boolean;
-		Then: () => ReactNode;
+		Then: () => JSX.Element;
 	}[];
 	private routeRegexes: { path: RoutePath; regex: RegExp; keys: string[]; optionalKeys: string[] }[];
 

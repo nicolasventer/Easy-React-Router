@@ -1,3 +1,4 @@
+import Bun from "bun";
 import { hash } from "crypto";
 import fs from "fs";
 import path from "path";
@@ -265,6 +266,7 @@ export const {
 	RouteLink,
 	RouterRender,
 	buildRouteLink,
+	/** The current route of the app. It is set to undefined if the route is not found (see {@link notFoundRoute}). */
 	currentRoute,
 	getRouteParams,
 	isRouteLoaded,
@@ -272,6 +274,7 @@ export const {
 	isRouteVisible,
 	loadRouteFn,
 	navigateToRouteFn,
+	/** The route that is displayed when the current route is not found. */
 	notFoundRoute,
 	setRouterBaseRoute,
 	setUseRouteTransition,
@@ -300,7 +303,15 @@ export const {
 	appendRoutes(true);
 	routerInstanceContent += `\t}\n);
 
+/** The type of the route paths. */
 export type RouterPathType = typeof currentRoute.value;
+/**
+ * @template {string} RoutePath
+ * Type of the parameters of a route path.
+ * \`params\` is optional if the route has no parameters.
+ * @example
+ * type A = RouteParams<"/a/:b/c?d">; // { b: string; d?: string; }
+ */
 export type RouterParamsType<T extends RouterPathType> = RouteParams<T>;
 
 updateCurrentRoute();\n`;

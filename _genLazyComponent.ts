@@ -1,3 +1,4 @@
+import Bun from "bun";
 import fs from "fs";
 import path from "path";
 
@@ -44,11 +45,12 @@ const formatFile = async (filePath: string) => {
 				isDefaultRouteExport = isRouteExport;
 			}
 		}
-		const notLazyFileContent = `/* eslint-disable react-refresh/only-export-components */
-import { lazyLoader } from "${relativePathToSrc}/router_src/lazyLoader";
+		const notLazyFileContent = `import { lazyLoader } from "${relativePathToSrc}/router_src/lazyLoader";
 
 const ${fileNameNoExtNoLazy}LazyLoader = lazyLoader(() => import("./${fileNameNoExtNoLazy}.lazy"));
+/** The function to load the module. */
 export const load = ${fileNameNoExtNoLazy}LazyLoader.load;
+/** The loading state. */
 export const loadingState = ${fileNameNoExtNoLazy}LazyLoader.loadingState;
 ${exportList
 	.map(

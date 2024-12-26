@@ -20,5 +20,5 @@
 		"noFallthroughCasesInSwitch": true,
 		"noUncheckedSideEffectImports": true
 	},
-	"include": ["src", "_genRoutes.ts", "_genLazyComponent.ts", "_deploy.ts"]
+	"include": ["src", "_*.ts"]
 }
