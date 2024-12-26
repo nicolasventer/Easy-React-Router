@@ -4,7 +4,11 @@
 
 _(It also works with Preact.)_
 
-This project also includes `Lazy-Component-Loader` which automatically changes the import of components to lazy imports only by renaming the file with a `.lazy.tsx` extension.
+This project also includes [`Lazy-Component-Loader`](#lazy-component-loader) which automatically changes the import of components to lazy imports only by renaming the file with a `.lazy.tsx` extension.
+
+### [Try it online](https://nicolasventer.github.io/Easy-React-Router/)
+
+![Easy-React-Router-screenshot](misc/Easy-React-Router-screenshot.jpeg)
 
 ## Features
 
@@ -53,7 +57,7 @@ _If you weirdly need `/404` in your path, create a folder named `404`. Same for 
 
 ### Structure
 
-<img src="misc/structure.png" alt="Structure" width="800">
+![Structure](misc/structure.png)
 
 ### genRoutes
 
