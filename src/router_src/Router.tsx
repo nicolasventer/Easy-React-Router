@@ -133,6 +133,7 @@ export class Router<RoutePath extends string> {
 		this.sortedRoutes = Object.entries(routes)
 			.sort(([a], [b]) => a.length - b.length)
 			.sort(([a], [b]) => Number(a.endsWith("/")) - Number(b.endsWith("/")))
+			.map(([path, loader]) => [path.replace(/\?.*$/, ""), loader] as const)
 			.map(([path, loader]) => ({
 				conditionFn: (p, subPath) => {
 					if (subPath !== "/" && path === "/") return p === "/";
@@ -218,7 +219,7 @@ export class Router<RoutePath extends string> {
 
 	/** Whether the current route is visible. */
 	isRouteVisible = <T extends PublicRoutePath<RoutePath>>(path: T) =>
-		path === "/" || path === "//"
+		path === "/" || path === "//" || path.startsWith("?")
 			? (this.currentRoute_.value ?? this.notFoundRoute_.value) === "/"
 			: (this.currentRoute_.value ?? this.notFoundRoute_.value)?.startsWith(path);
 
