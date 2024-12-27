@@ -100,10 +100,12 @@ _If you weirdly need `/404` in your path, create a folder named `404`. Same for 
 
 ### Deployment
 
-After building the project, pass the main `index.html` to the command `bun _genRoutes.ts --html <path-to-index.html>`.  
+After building the project, pass the main `index.html` to the command  
+`bun _genRoutes.ts --html <path-to-index.html>`.  
 This will generate a [`staticRoutes.yaml`](staticRoutes.yaml) file that will be used to generate copies of the `index.html` file with the correct paths.  
 You can manually edit the `staticRoutes.yaml` file to add more routes.  
-By default, the `staticRoutes.yaml` file is not overwritten. Use the `--overwrite` flag to overwrite it (like this: `bun _genRoutes.ts --html <path-to-index.html> --overwrite`).
+By default, the `staticRoutes.yaml` file is not overwritten. Use the `--overwrite` flag to overwrite it  
+(like this: `bun _genRoutes.ts --html <path-to-index.html> --overwrite`).
 
 # Lazy-Component-Loader
 

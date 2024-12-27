@@ -130,17 +130,6 @@ export class Router<RoutePath extends string> {
 	private routeRegexes: { path: RoutePath; regex: RegExp; keys: string[]; optionalKeys: string[] }[];
 
 	constructor(private routes: Routes<RoutePath>, private notFoundRoutes: Partial<Routes<RoutePathWithSubPaths<RoutePath>>>) {
-		this.sortedRoutes = Object.entries(routes)
-			.sort(([a], [b]) => a.length - b.length)
-			.sort(([a], [b]) => Number(a.endsWith("/")) - Number(b.endsWith("/")))
-			.map(([path, loader]) => [path.replace(/\?.*$/, ""), loader] as const)
-			.map(([path, loader]) => ({
-				conditionFn: (p, subPath) => {
-					if (subPath !== "/" && path === "/") return p === "/";
-					return p && subPath !== path && `${p}/`.startsWith(path);
-				},
-				Then: (loader as Routes<RoutePath>[RoutePath]).Component,
-			}));
 		this.routeRegexes = Object.keys(routes)
 			.sort((a, b) => a.length - b.length)
 			.sort((a, b) => Number(a.endsWith("/")) - Number(b.endsWith("/")))
@@ -149,15 +138,23 @@ export class Router<RoutePath extends string> {
 				regex: new RegExp(
 					`^${path
 						// Replace :[^/]* with ([^/]+)
-						.replace(/:[^/]*$/, "([^/]+)")
+						.replace(/:[^/]*/g, "([^/]+)")
 						// Replace start ? with /?
-						.replace(/^\?/, "/?")
+						.replace(/^\?/g, "/?")
 						// Replace ?.* with nothing
 						.replace(/\?.*$/, "")}$`
 				),
 				keys: path.match(/:([^/]+)/g)?.map((s) => s.slice(1)) ?? [],
 				optionalKeys: path.match(/\?([^/?]+)/g)?.map((s) => s.slice(1)) ?? [],
 			}));
+		this.sortedRoutes = this.routeRegexes.map(({ path }) => ({
+			conditionFn: (p, subPath) => {
+				if (subPath !== "/" && path === "/") return p === "/";
+				return p && subPath !== path && `${p}/`.startsWith(path);
+			},
+			Then: routes[path].Component,
+		}));
+
 		window.addEventListener("popstate", () => this.updateCurrentRoute());
 	}
 
@@ -219,17 +216,17 @@ export class Router<RoutePath extends string> {
 
 	/** Whether the current route is visible. */
 	isRouteVisible = <T extends PublicRoutePath<RoutePath>>(path: T) =>
-		path === "/" || path === "//" || path.startsWith("?")
+		path === "/" || path === "//"
 			? (this.currentRoute_.value ?? this.notFoundRoute_.value) === "/"
+			: path.startsWith("?")
+			? (this.currentRoute_.value ?? this.notFoundRoute_.value) === path
 			: (this.currentRoute_.value ?? this.notFoundRoute_.value)?.startsWith(path);
 
 	/** Whether the current route is loading. */
-	isRouteLoading = (path: PublicRoutePath<RoutePath>) =>
-		path !== "/" && this.routes[path as RoutePath]?.loadingState.value === "loading";
+	isRouteLoading = (path: PublicRoutePath<RoutePath>) => this.routes[path as RoutePath]?.loadingState.value === "loading";
 
 	/** Whether the current route is loaded. */
-	isRouteLoaded = (path: PublicRoutePath<RoutePath>) =>
-		path === "/" || this.routes[path as RoutePath]?.loadingState.value === "loaded";
+	isRouteLoaded = (path: PublicRoutePath<RoutePath>) => this.routes[path as RoutePath]?.loadingState.value === "loaded";
 
 	/** Builds a link to a route. */
 	buildRouteLink = <T extends PublicRoutePath<RoutePath>>(...params: BuildLinkParams<T>) => {
