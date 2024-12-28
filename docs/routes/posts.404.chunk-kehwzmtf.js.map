@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "sources": ["..\\src\\routes\\posts.404.tsx"],
+  "sourcesContent": [
+    "export const PostNotFound = () => <h2 style={{ background: \"orange\" }}>Post Not Found</h2>;\r\n"
+  ],
+  "mappings": "qEAAa,EAAe,IAAM,SAAqD,KAArD,CAAI,MAAO,CAAE,WAAY,QAAS,EAAlC,gDAAqD",
+  "debugId": "34586BE8B18842E564756E2164756E21",
+  "names": []
+}

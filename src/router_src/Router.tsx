@@ -1,5 +1,5 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
-import { batch, signal, type ReadonlySignal } from "@preact/signals";
+import { batch, effect, signal, type ReadonlySignal, type Signal } from "@preact/signals";
 import type { ComponentPropsWithoutRef, JSX, ReactNode } from "react";
 import { flushSync } from "react-dom";
 import { LazySingleLoaderReturn } from "./lazyLoader";
@@ -129,7 +129,17 @@ export class Router<RoutePath extends string> {
 	}[];
 	private routeRegexes: { path: RoutePath; regex: RegExp; keys: string[]; optionalKeys: string[] }[];
 
-	constructor(private routes: Routes<RoutePath>, private notFoundRoutes: Partial<Routes<RoutePathWithSubPaths<RoutePath>>>) {
+	/**
+	 * Creates a new router instance.
+	 * @param routes The routes of the app with their components.
+	 * @param notFoundRoutes The routes of the app that are displayed when the current route is not found.
+	 * @param urlSignal Signal that simulates the URL for the router instance. This should start with '/'.
+	 */
+	constructor(
+		private routes: Routes<RoutePath>,
+		private notFoundRoutes: Partial<Routes<RoutePathWithSubPaths<RoutePath>>>,
+		private urlSignal?: Signal<string>
+	) {
 		this.routeRegexes = Object.keys(routes)
 			.sort((a, b) => a.length - b.length)
 			.sort((a, b) => Number(a.endsWith("/")) - Number(b.endsWith("/")))
@@ -155,7 +165,8 @@ export class Router<RoutePath extends string> {
 			Then: routes[path].Component,
 		}));
 
-		window.addEventListener("popstate", () => this.updateCurrentRoute());
+		if (urlSignal) effect(() => this.updateCurrentRoute());
+		else window.addEventListener("popstate", () => this.updateCurrentRoute());
 	}
 
 	/** Hook need in React that should be called in the Main Layout component if its render depends on current route or loading state. */
@@ -179,9 +190,13 @@ export class Router<RoutePath extends string> {
 
 	/** Updates the current route based on the current URL. It is called automatically when the app starts and when {@link navigateToRouteFn} is called. */
 	updateCurrentRoute = () => {
-		const path = window.location.pathname.replace(this.routerBaseRoute, "").replace(/\/$/, "") || "/";
+		const urlSignalSlash = this.urlSignal?.value?.startsWith("/") ? "" : "/";
+		const url = this.urlSignal?.value
+			? new URL(`http://x${this.routerBaseRoute}${urlSignalSlash}${this.urlSignal.value}`)
+			: new URL(window.location.href);
+		const path = url.pathname.replace(this.routerBaseRoute, "").replace(/\/$/, "") || "/";
 		let routeRegex = this.routeRegexes.find(
-			({ regex, optionalKeys }) => (window.location.search === "") === (optionalKeys.length === 0) && regex.test(path)
+			({ regex, optionalKeys }) => (url.search === "") === (optionalKeys.length === 0) && regex.test(path)
 		);
 		routeRegex ??= this.routeRegexes.find(({ regex }) => regex.test(path));
 		if (!routeRegex) {
@@ -199,7 +214,7 @@ export class Router<RoutePath extends string> {
 		const params = path.match(routeRegex.regex)!.slice(1);
 		const routeParams = {} as any;
 		routeRegex.keys.forEach((key, i) => (routeParams[key] = params[i]));
-		const searchParams = new URLSearchParams(window.location.search);
+		const searchParams = new URLSearchParams(url.search);
 		searchParams.forEach((value, key) => (routeParams[key] = value));
 		this.routeParams_.value = routeParams ?? {};
 	};
@@ -276,7 +291,8 @@ export class Router<RoutePath extends string> {
 				});
 				const link = this.buildRouteLink(...(params as BuildLinkParams<T>));
 				const link2 = link === "//" ? "/" : link; // this is a hack
-				window.history.pushState({}, "", link2 || "/");
+				if (this.urlSignal) this.urlSignal.value = link2;
+				else window.history.pushState({}, "", link2 || "/");
 			};
 			if (this.useRouteTransition_) document.startViewTransition(() => flushSync(navigateFn));
 			else navigateFn();

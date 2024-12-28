@@ -211,17 +211,17 @@ if (Bun.argv.includes("--html")) {
 	}
 	// generate all static routes html files
 
-	const htmlFileName = Bun.argv[Bun.argv.indexOf("--html") + 1];
-	if (!htmlFileName) {
+	const htmlFilePath = Bun.argv[Bun.argv.indexOf("--html") + 1];
+	if (!htmlFilePath) {
 		console.error("htmlFile not provided");
 		process.exit(1);
 	}
-	if (!fs.existsSync(htmlFileName)) {
-		console.error(`htmlFile ${htmlFileName} not found`);
+	if (!fs.existsSync(htmlFilePath)) {
+		console.error(`htmlFile ${htmlFilePath} not found`);
 		process.exit(1);
 	}
-	const htmlFileContent = await Bun.file(htmlFileName).text();
-	const htmlFolder = path.dirname(htmlFileName);
+	const htmlFileContent = await Bun.file(htmlFilePath).text();
+	const htmlFolder = path.dirname(htmlFilePath);
 
 	const staticRoutesContent = await Bun.file(STATIC_ROUTES_FILE).text();
 	const staticRoutesArray = staticRoutesContent
@@ -231,18 +231,18 @@ if (Bun.argv.includes("--html")) {
 
 	for (const staticRoute of staticRoutesArray) {
 		const folder = path.dirname(staticRoute);
-		const fileName = path.basename(staticRoute);
+		const fileName = path.basename(staticRoute).trim();
 		if (!fileName) continue;
 		const subFolderCount = folder.split("/").filter((f) => f).length;
 		const subFolder = subFolderCount === 0 ? "./" : "../".repeat(subFolderCount);
-		const htmlFilePath = `${htmlFolder}${folder === "/" ? "" : folder}/${fileName}.html`;
+		const staticHtmlFilePath = `${htmlFolder}${folder === "/" ? "" : folder}/${fileName}.html`;
 		await Bun.write(
-			htmlFilePath,
+			staticHtmlFilePath,
 			htmlFileContent
 				// replace all ./ with subFolder
 				.replace(/\.\//g, subFolder)
 		);
-		console.log(`${htmlFilePath} generated.`);
+		console.log(`${staticHtmlFilePath} generated.`);
 	}
 } else {
 	const existingRouterInstanceContent = await Bun.file(ROUTER_INSTANCE_FILE)
