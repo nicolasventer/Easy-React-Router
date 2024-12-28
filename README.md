@@ -25,6 +25,7 @@ This project also includes [`Lazy-Component-Loader`](#lazy-component-loader) whi
 - route link component
 - optional use of document transition API
 - manual route loading
+- local router instance (see example in [src/routes/about.tsx](src/routes/about.tsx))
 
 ## File based routing
 
