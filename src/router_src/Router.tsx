@@ -124,7 +124,7 @@ export class Router<RoutePath extends string> {
 	private routeParams_ = signal<RouteParams<RoutePath> | {}>({});
 	// routes sorted by increasing length and then by decreasing ending slash
 	private sortedRoutes: {
-		conditionFn: (p: PublicRoutePath<RoutePath>, subPath: PublicRoutePath<RoutePath>) => boolean;
+		conditionFn: (p: PublicRoutePath<RoutePath>, subPath: RoutePathWithSubPaths<PublicRoutePath<RoutePath>>) => boolean;
 		Then: () => JSX.Element;
 	}[];
 	private routeRegexes: { path: RoutePath; regex: RegExp; keys: string[]; optionalKeys: string[] }[];
@@ -140,7 +140,7 @@ export class Router<RoutePath extends string> {
 						// Replace :[^/]* with ([^/]+)
 						.replace(/:[^/]*/g, "([^/]+)")
 						// Replace start ? with /?
-						.replace(/^\?/g, "/?")
+						.replace(/^\?/, "/?")
 						// Replace ?.* with nothing
 						.replace(/\?.*$/, "")}$`
 				),
@@ -179,16 +179,15 @@ export class Router<RoutePath extends string> {
 
 	/** Updates the current route based on the current URL. It is called automatically when the app starts and when {@link navigateToRouteFn} is called. */
 	updateCurrentRoute = () => {
-		const path = window.location.pathname.replace(this.routerBaseRoute, "");
-		let routeRegex = this.routeRegexes.find(({ regex }) => regex.test(path));
-		if (window.location.search === "" && routeRegex?.optionalKeys.length !== 0) {
-			const newRouteRegex = this.routeRegexes.find(({ regex, optionalKeys }) => optionalKeys.length === 0 && regex.test(path));
-			if (newRouteRegex) routeRegex = newRouteRegex;
-		}
+		const path = window.location.pathname.replace(this.routerBaseRoute, "").replace(/\/$/, "") || "/";
+		let routeRegex = this.routeRegexes.find(
+			({ regex, optionalKeys }) => (window.location.search === "") === (optionalKeys.length === 0) && regex.test(path)
+		);
+		routeRegex ??= this.routeRegexes.find(({ regex }) => regex.test(path));
 		if (!routeRegex) {
 			const sortedSubPathArray = Object.keys(this.routes)
-				.sort((a, b) => b.length - a.length)
-				.filter((a) => a === "/" || !a.endsWith("/"));
+				.filter((a) => a === "/" || !a.endsWith("/"))
+				.sort((a, b) => b.length - a.length);
 			const sortedSubPath = sortedSubPathArray.find((subPath) => path.startsWith(subPath));
 			this.currentRoute_.value = undefined;
 			this.notFoundRoute_.value = sortedSubPath as RoutePath;
@@ -216,9 +215,7 @@ export class Router<RoutePath extends string> {
 
 	/** Whether the current route is visible. */
 	isRouteVisible = <T extends PublicRoutePath<RoutePath>>(path: T) =>
-		path === "/" || path === "//"
-			? (this.currentRoute_.value ?? this.notFoundRoute_.value) === "/"
-			: path.startsWith("?")
+		path === "/" || path.startsWith("?")
 			? (this.currentRoute_.value ?? this.notFoundRoute_.value) === path
 			: (this.currentRoute_.value ?? this.notFoundRoute_.value)?.startsWith(path);
 
