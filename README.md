@@ -22,6 +22,7 @@ This project also includes [`Lazy-Component-Loader`](#lazy-component-loader) whi
   - route path
   - route visibility
   - route loading state
+- route specialization
 - route link component
 - optional use of document transition API
 - manual route loading
@@ -49,6 +50,7 @@ This table shows the equivalence between routes and their respective path.
 | `/` `posts$id.tsx`                | `/posts:id` _(`id` is optional)_   | `/posts?id=abc`, `/posts`   |
 | `/` `posts.$id.tsx`               | `/posts/:id` _(`id` is mandatory)_ | `/posts/abc`, `/posts/123`  |
 | `/` `posts/` `$id.tsx`            | `/posts/:id` _(`id` is mandatory)_ | `/posts/abc`, `/posts/123`  |
+| `/` `posts.3.tsx`                 | `/posts/3`                         | `/posts/3`                  |
 | `/` `posts/` `404.tsx`            | not found at `/posts`              | _(automatic path)_          |
 | `/` `(ignored-file).tsx`          | _(no path)_                        | _(no path)_                 |
 

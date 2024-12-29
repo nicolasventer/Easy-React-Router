@@ -14,9 +14,15 @@ export const PostsLayout = () => (
 						key={i}
 						path="/posts/:id"
 						params={{ id: i.toString() }}
-						style={{ color: getRouteParams("/posts/:id").value.id === i.toString() ? "blue" : "black" }}
+						style={{
+							color:
+								getRouteParams("/posts/:id").value.id === i.toString() || (i === 3 && currentRoute.value === "/posts/3")
+									? "blue"
+									: "black",
+						}}
 					>
 						Post {i}
+						{i === 3 ? " (special)" : ""}
 						{B_PROD && i < 5 ? " (statically deployed)" : ""}
 					</RouteLink>
 				))}

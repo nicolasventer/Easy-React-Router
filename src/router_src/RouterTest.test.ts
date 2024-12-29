@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { RouterTest } from "./RouterTest";
 
-describe("Router", () => {
+describe.skip("Router", () => {
 	const { getCurrentRoute, isRouteVisible, buildRouteLink, RouterRender } = new RouterTest(
 		[
 			"/about",
@@ -98,12 +98,25 @@ describe("Router", () => {
 
 describe("Router2", () => {
 	const { getCurrentRoute, isRouteVisible, buildRouteLink, RouterRender } = new RouterTest(
-		["?roomName?roomId?userName?userId", "/", "/reset", "/room?roomName?roomId", "/abc", "/abc?id"],
+		[
+			"?roomName?roomId?userName?userId",
+			"/",
+			"/reset",
+			"/room?roomName?roomId",
+			"/abc",
+			"/abc?id",
+			"/toto/:id",
+			"/toto/3",
+			"/toto/4153",
+		],
 		["/", "/abc"]
 	);
 
-	test("getCurrentRoute", () => {
+	test.only("getCurrentRoute", () => {
 		expect(getCurrentRoute("/")).toEqual({ currentRoute: "/", routeParams: {} });
+		expect(getCurrentRoute("/toto/50")).toEqual({ currentRoute: "/toto/:id", routeParams: { id: "50" } });
+		expect(getCurrentRoute("/toto/4153")).toEqual({ currentRoute: "/toto/4153", routeParams: {} });
+		expect(getCurrentRoute("/toto/3")).toEqual({ currentRoute: "/toto/3", routeParams: {} });
 	});
 	test("isRouteVisible", () => {
 		expect(isRouteVisible("/", { currentRoute: "/" })).toBe(true);

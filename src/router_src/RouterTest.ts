@@ -91,7 +91,7 @@ type RouteParamsOutput<RoutePath extends string> = { routeParams: {} | RoutePara
  */
 export class RouterTest<RoutePath extends string> {
 	private routerBaseRoute = "";
-	// routes sorted by decreasing length
+	// routes sorted by decreasing ':' then by alphabetical order then by decreasing length
 	private routeRegexes: { path: RoutePath; regex: RegExp; keys: string[]; optionalKeys: string[] }[];
 	private routesParentMap = new Map<RoutePath, PublicRoutePath<RoutePath>>(); // key is a path, value is the parent path
 
@@ -103,7 +103,17 @@ export class RouterTest<RoutePath extends string> {
 	 */
 	constructor(private routes: RoutePath[], private notFoundRoutes: RoutePathWithSubPaths<PublicRoutePath<RoutePath>>[]) {
 		this.routeRegexes = [...routes]
-			.sort((a, b) => b.length - a.length)
+			.sort((a, b) => {
+				for (let i = 0; i < Math.min(a.length, b.length); i++) {
+					const ca = a[i];
+					const cb = b[i];
+					if (ca === cb) continue;
+					if (ca === ":") return 1;
+					if (cb === ":") return -1;
+					return ca.localeCompare(cb);
+				}
+				return b.length - a.length;
+			})
 			.map((path) => ({
 				path: path as RoutePath,
 				regex: new RegExp(

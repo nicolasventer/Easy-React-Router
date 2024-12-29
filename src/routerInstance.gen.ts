@@ -1,4 +1,4 @@
-// 350189d4c165c74d6d1e06a7edbc54d62559b606c6527758e0b8c4a1a0242658
+// 925bfb6cb770283b793f97edbb1842ba2a4b14468e0861a9055ededdf94793ba
 import { checkValidRoute } from "./router_src/checkValidRoute";
 import { lazySingleLoader } from "./router_src/lazyLoader";
 import { RouteParams, Router } from "./router_src/Router";
@@ -29,6 +29,7 @@ export const {
 		[checkValidRoute("//")]: lazySingleLoader(() => import("./routes/index.index"), "Home"),
 		[checkValidRoute("/")]: lazySingleLoader(() => import("./routes/index"), "MainLayout"),
 		[checkValidRoute("/posts/:id")]: lazySingleLoader(() => import("./routes/posts.$id"), "PostWithId"),
+		[checkValidRoute("/posts/3")]: lazySingleLoader(() => import("./routes/posts.3"), "PostWithId3"),
 		[checkValidRoute("/posts/")]: lazySingleLoader(() => import("./routes/posts.index.index"), "PostWithoutId"),
 		[checkValidRoute("/posts")]: lazySingleLoader(() => import("./routes/posts"), "PostsLayout"),
 	},
