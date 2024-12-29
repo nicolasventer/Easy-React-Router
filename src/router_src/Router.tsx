@@ -3,7 +3,6 @@ import { batch, effect, signal, type ReadonlySignal, type Signal } from "@preact
 import type { ComponentPropsWithoutRef, JSX, ReactNode } from "react";
 import { flushSync } from "react-dom";
 import { LazySingleLoaderReturn } from "./lazyLoader";
-import { MultiIf } from "./MultiIf";
 import { useReact } from "./useReact";
 
 /**
@@ -39,11 +38,17 @@ type RouteParams_<T extends string> = (SplitPath<T> & `:${string}` extends never
 
 /**
  * @notExported
+ * Type of a registered route.
+ */
+type RouteValue = LazySingleLoaderReturn<() => JSX.Element>;
+
+/**
+ * @notExported
  * @template {string} T
  * Type to store the routes of the app. \
  * The keys are the paths of the routes and the values are the components of the routes.
  */
-type Routes<T extends string> = Record<T, LazySingleLoaderReturn<() => JSX.Element>>;
+type Routes<T extends string> = Record<T, RouteValue>;
 
 /**
  * @template {string} RoutePath
@@ -119,15 +124,12 @@ type RoutePathWithSubPaths<RoutePath extends string> = {
 export class Router<RoutePath extends string> {
 	private routerBaseRoute = "";
 	private useRouteTransition_ = true;
-	private currentRoute_ = signal<RoutePath>();
-	private notFoundRoute_ = signal<RoutePath>();
+	private currentRoute_ = signal<PublicRoutePath<RoutePath>>();
+	private notFoundRoute_ = signal<PublicRoutePath<RoutePath>>();
 	private routeParams_ = signal<RouteParams<RoutePath> | {}>({});
-	// routes sorted by increasing length and then by decreasing ending slash
-	private sortedRoutes: {
-		conditionFn: (p: PublicRoutePath<RoutePath>, subPath: RoutePathWithSubPaths<PublicRoutePath<RoutePath>>) => boolean;
-		Then: () => JSX.Element;
-	}[];
+	// routes sorted by decreasing length
 	private routeRegexes: { path: RoutePath; regex: RegExp; keys: string[]; optionalKeys: string[] }[];
+	private routesParentMap = new Map<RoutePath, PublicRoutePath<RoutePath>>(); // key is a path, value is the parent path
 
 	/**
 	 * Creates a new router instance.
@@ -137,12 +139,11 @@ export class Router<RoutePath extends string> {
 	 */
 	constructor(
 		private routes: Routes<RoutePath>,
-		private notFoundRoutes: Partial<Routes<RoutePathWithSubPaths<RoutePath>>>,
+		private notFoundRoutes: Partial<Routes<RoutePathWithSubPaths<PublicRoutePath<RoutePath>>>>,
 		private urlSignal?: Signal<string>
 	) {
 		this.routeRegexes = Object.keys(routes)
-			.sort((a, b) => a.length - b.length)
-			.sort((a, b) => Number(a.endsWith("/")) - Number(b.endsWith("/")))
+			.sort((a, b) => b.length - a.length)
 			.map((path) => ({
 				path: path as RoutePath,
 				regex: new RegExp(
@@ -157,14 +158,23 @@ export class Router<RoutePath extends string> {
 				keys: path.match(/:([^/]+)/g)?.map((s) => s.slice(1)) ?? [],
 				optionalKeys: path.match(/\?([^/?]+)/g)?.map((s) => s.slice(1)) ?? [],
 			}));
-		this.sortedRoutes = this.routeRegexes.map(({ path }) => ({
-			conditionFn: (p, subPath) => {
-				if (subPath !== "/" && path === "/") return p === "/";
-				return p && subPath !== path && `${p}/`.startsWith(path);
-			},
-			Then: routes[path].Component,
-		}));
 
+		for (const { path } of this.routeRegexes) {
+			if (path === "/") continue;
+			if (path.startsWith("?")) {
+				this.routesParentMap.set(path, "/" as PublicRoutePath<RoutePath>); // we assume that "/" is always a RoutePath
+				continue;
+			}
+			for (const { path: parentPath } of this.routeRegexes) {
+				if (path === parentPath) continue;
+				if (parentPath !== "/" && parentPath.endsWith("/")) continue;
+				if (path.startsWith(parentPath)) {
+					const oldParent = this.routesParentMap.get(path);
+					if (oldParent && oldParent.length > parentPath.length) continue;
+					this.routesParentMap.set(path, parentPath as PublicRoutePath<RoutePath>);
+				}
+			}
+		}
 		if (urlSignal) effect(() => this.updateCurrentRoute());
 		else window.addEventListener("popstate", () => this.updateCurrentRoute());
 	}
@@ -205,11 +215,11 @@ export class Router<RoutePath extends string> {
 				.sort((a, b) => b.length - a.length);
 			const sortedSubPath = sortedSubPathArray.find((subPath) => path.startsWith(subPath));
 			this.currentRoute_.value = undefined;
-			this.notFoundRoute_.value = sortedSubPath as RoutePath;
+			this.notFoundRoute_.value = sortedSubPath as PublicRoutePath<RoutePath>;
 			this.routeParams_.value = {};
 			return;
 		}
-		this.currentRoute_.value = routeRegex.path;
+		this.currentRoute_.value = routeRegex.path as PublicRoutePath<RoutePath>;
 		this.notFoundRoute_.value = undefined;
 		const params = path.match(routeRegex.regex)!.slice(1);
 		const routeParams = {} as any;
@@ -286,8 +296,8 @@ export class Router<RoutePath extends string> {
 			const navigateFn = () => {
 				const [path, p] = params;
 				batch(() => {
-					this.currentRoute_.value = path as unknown as RoutePath;
-					this.routeParams_.value = (p as unknown as RouteParams<RoutePath>) ?? {};
+					this.currentRoute_.value = path;
+					this.routeParams_.value = p ?? {};
 				});
 				const link = this.buildRouteLink(...(params as BuildLinkParams<T>));
 				const link2 = link === "//" ? "/" : link; // this is a hack
@@ -314,6 +324,27 @@ export class Router<RoutePath extends string> {
 		</a>
 	);
 
+	private getComponentToRender = (subPath: RoutePathWithSubPaths<PublicRoutePath<RoutePath>>) => {
+		const p = this.currentRoute_.value ?? (this.notFoundRoute_.value === subPath ? undefined : this.notFoundRoute_.value);
+		if (!p) return undefined;
+		if (subPath === p) {
+			const SlashComp = this.routes[`${p}/` as RoutePath]?.Component;
+			if (SlashComp) return SlashComp;
+			const p_ = p === "/" ? "" : p;
+			for (const [path, { Component }] of Object.entries<RouteValue>(this.routes))
+				if (path.startsWith(`${p_}?`)) return Component;
+			return undefined;
+		}
+		let result = p;
+		let parent = this.routesParentMap.get(result as RoutePath);
+		while (parent && parent !== subPath) {
+			result = parent;
+			parent = this.routesParentMap.get(result as RoutePath);
+		}
+		if (parent === subPath) return this.routes[result as RoutePath]?.Component;
+		return undefined;
+	};
+
 	/**
 	 * The component whose render depends on the current route.
 	 * @param params
@@ -323,16 +354,7 @@ export class Router<RoutePath extends string> {
 	RouterRender = ({ subPath }: { subPath: RoutePathWithSubPaths<PublicRoutePath<RoutePath>> }) => (
 		<>
 			{this.useRoutes()}
-			<MultiIf
-				branches={this.sortedRoutes.map(({ conditionFn, Then }) => ({
-					condition: conditionFn(
-						this.currentRoute.value ?? (this.notFoundRoute_.value === subPath ? undefined : this.notFoundRoute_.value),
-						subPath
-					),
-					then: <Then />,
-				}))}
-				else={<this.NotFoundRouteRender subPath={subPath} />}
-			/>
+			{this.getComponentToRender(subPath)?.() ?? this.NotFoundRouteRender({ subPath })}
 		</>
 	);
 
