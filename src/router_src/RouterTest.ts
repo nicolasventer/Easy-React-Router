@@ -2,8 +2,8 @@
 
 /**
  * @notExported
- * @template {string} T
  * Type to split a path into its parts.
+ * @template {string} T The type of the route paths.
  */
 type SplitPath<T extends string, Prefix extends ":" | "?" | "/" | "" = ""> = T extends `${infer U}:${infer V}`
 	? SplitPath<U, Prefix> | SplitPath<V, ":">
@@ -17,8 +17,8 @@ type SplitPath<T extends string, Prefix extends ":" | "?" | "/" | "" = ""> = T e
 
 /**
  * @notExported
- * @template {string} T
  * Type to get the parameters of a route path.
+ * @template {string} T The type of the route paths.
  */
 type RouteParams_<T extends string> = (SplitPath<T> & `:${string}` extends never
 	? {}
@@ -33,9 +33,9 @@ type RouteParams_<T extends string> = (SplitPath<T> & `:${string}` extends never
 
 /**
  * @notExported
- * @template {string} RoutePath
  * Type of the parameters of a route path.
  * `params` is optional if the route has no parameters.
+ * @template {string} RoutePath The type of the route paths.
  * @example
  * type A = RouteParams<"/a/:b/c?d">; // { b: string; d?: string; }
  */
@@ -43,8 +43,8 @@ type RouteParams<RoutePath extends string> = RouteParams_<RoutePath>;
 
 /**
  * @notExported
- * @template {string} RoutePath
  * Type to get the route path that should be accessible to the public.
+ * @template {string} RoutePath The type of the route paths.
  */
 type PublicRoutePath<RoutePath extends string> = RoutePath extends "/"
 	? "/"
@@ -54,8 +54,8 @@ type PublicRoutePath<RoutePath extends string> = RoutePath extends "/"
 
 /**
  * @notExported
- * @template {string} RoutePath
  * Type of the parameters of the build link function. `params` is optional if the route has no parameters.
+ * @template {string} RoutePath The type of the route paths.
  */
 type BuildLinkParams<RoutePath extends string> = keyof RouteParams<RoutePath> extends never
 	? [path: RoutePath]
@@ -63,8 +63,8 @@ type BuildLinkParams<RoutePath extends string> = keyof RouteParams<RoutePath> ex
 
 /**
  * @notExported
- * @template {string} RoutePath
  * Type to get the subpaths of a route path.
+ * @template {string} RoutePath The type of the route paths.
  * @example
  * type A = RoutePathWithSubPaths<"/a" | "/a/b/c">; // "/a"
  */
@@ -82,8 +82,8 @@ type RoutePathWithSubPaths<RoutePath extends string> = {
 
 /**
  * @notExported
- * @template {string} RoutePath
  * Type of the output of getCurrentRoute.
+ * @template {string} RoutePath The type of the route paths.
  */
 type CurrentRouteOutput<RoutePath extends string> = {
 	/** The current route if found. */
@@ -94,8 +94,8 @@ type CurrentRouteOutput<RoutePath extends string> = {
 
 /**
  * @notExported
- * @template {string} RoutePath
  * Type of the routeParams of the output of getCurrentRoute.
+ * @template {string} RoutePath The type of the route paths.
  */
 type RouteParamsOutput<RoutePath extends string> = {
 	/** The parameters of the current route. */
