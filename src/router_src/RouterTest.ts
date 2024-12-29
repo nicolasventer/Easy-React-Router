@@ -32,6 +32,7 @@ type RouteParams_<T extends string> = (SplitPath<T> & `:${string}` extends never
 		  });
 
 /**
+ * @notExported
  * @template {string} RoutePath
  * Type of the parameters of a route path.
  * `params` is optional if the route has no parameters.
@@ -79,11 +80,27 @@ type RoutePathWithSubPaths<RoutePath extends string> = {
 		: never;
 }[RoutePath];
 
+/**
+ * @notExported
+ * @template {string} RoutePath
+ * Type of the output of getCurrentRoute.
+ */
 type CurrentRouteOutput<RoutePath extends string> = {
+	/** The current route if found. */
 	currentRoute?: PublicRoutePath<RoutePath>;
+	/** The route closest to the current route if the current route is not found. */
 	notFoundRoute?: PublicRoutePath<RoutePath>;
 };
-type RouteParamsOutput<RoutePath extends string> = { routeParams: {} | RouteParams<RoutePath> };
+
+/**
+ * @notExported
+ * @template {string} RoutePath
+ * Type of the routeParams of the output of getCurrentRoute.
+ */
+type RouteParamsOutput<RoutePath extends string> = {
+	/** The parameters of the current route. */
+	routeParams: {} | RouteParams<RoutePath>;
+};
 
 /**
  * Class used to test the router.
@@ -99,7 +116,6 @@ export class RouterTest<RoutePath extends string> {
 	 * Creates a new router instance.
 	 * @param routes The routes of the app with their components.
 	 * @param notFoundRoutes The routes of the app that are displayed when the current route is not found.
-	 * @param urlSignal Signal that simulates the URL for the router instance. This should start with '/'.
 	 */
 	constructor(private routes: RoutePath[], private notFoundRoutes: RoutePathWithSubPaths<PublicRoutePath<RoutePath>>[]) {
 		this.routeRegexes = [...routes]
