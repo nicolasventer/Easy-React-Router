@@ -75,8 +75,7 @@ _If you weirdly need `/404` in your path, create a folder named `404`. Same for 
   - use `--json` to additionally generate a JSON file with the result of the parsing
   - use `--force` to force the regeneration of the router instance
 
-  **Note:** The Main Layout Component is generally lazy exported since it is imported in the [root file](src/index.tsx) (to avoid a build warning).  
-  In this case, the `// @routeExport` comment is needed.
+  **Note:** The Main Layout Component is generally lazy exported since it is imported in the [root file](src/index.tsx) (to avoid a build warning). In this case, the `// @routeExport` comment is needed.
   </details>
 
 ### Router Instance
@@ -103,7 +102,7 @@ _If you weirdly need `/404` in your path, create a folder named `404`. Same for 
 
 ### Deployment
 
-After building the project, pass the main `index.html` to the command  
+After building the project, pass the main `index.html` to the command:  
 `bun _genRoutes.ts --html <path-to-index.html>`.  
 This will generate a [`staticRoutes.yaml`](staticRoutes.yaml) file that will be used to generate copies of the `index.html` file with the correct paths.  
 You can manually edit the `staticRoutes.yaml` file to add more routes.  

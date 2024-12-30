@@ -70,8 +70,8 @@ ${
 		console.log(`${notLazyFilePath} generated.`);
 	} else {
 		const fileContent = await Bun.file(filePath).text();
-		if (!fileContent.match(/import.*from.*\.lazy/)) return;
-		const newFileContent = fileContent.replace(/(import.*from.*)\.lazy/g, "$1");
+		if (!fileContent.match(/import\s[\s\S]*\sfrom\s[\s\S]*\.lazy/)) return;
+		const newFileContent = fileContent.replace(/(import\s[\s\S]*\sfrom\s[\s\S]*)\.lazy/g, "$1");
 		await Bun.write(filePath, newFileContent);
 		console.log(`${filePath} formatted.`);
 	}
