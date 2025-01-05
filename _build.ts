@@ -28,4 +28,4 @@ console.log("build done");
 fs.copyFileSync("./bun_index.html", "./dist/index.html");
 console.log("bun_index.html copied");
 
-await genHtmlRoutes("dist/index.html");
+await genHtmlRoutes({ htmlFile: "dist/index.html" });

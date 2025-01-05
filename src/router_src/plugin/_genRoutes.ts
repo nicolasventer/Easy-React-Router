@@ -47,6 +47,13 @@ const getSubTextPosArray = (text: string, subText: string, bStartOfLine: boolean
 	return posArray;
 };
 
+if (!fs.existsSync(ROUTES_DIR)) {
+	console.log(`generating sample routes in ${ROUTES_DIR}`);
+	fs.cpSync(path.resolve(__dirname, "sample", "routes"), ROUTES_DIR, { recursive: true });
+	const indexFileContent = await Bun.file(path.resolve(__dirname, "sample", "index.tsx")).text();
+	console.log(`index.tsx can be updated with the following content:\n\n${indexFileContent}\n`);
+}
+
 for (const fileObj of fs.readdirSync(ROUTES_DIR, { recursive: true, withFileTypes: true })) {
 	if (!fileObj.isFile() || !fileObj.name.endsWith(".tsx")) continue;
 	const filePath = `./${fileObj.parentPath}/${fileObj.name}`

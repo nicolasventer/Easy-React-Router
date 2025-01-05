@@ -76,6 +76,39 @@ export default defineConfig({
 });
 ```
 
+If `routes` folder does not exist, the plugin will create it with some example files.  
+And then, you can update the content of `index.tsx` file to render the `MainLayout` component:
+
+```tsx
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { MainLayout } from "./routes";
+
+createRoot(document.getElementById("root")!).render(
+	<StrictMode>
+		<MainLayout />
+	</StrictMode>
+);
+```
+
+For building, execute:
+
+```ts
+import { genHtmlRoutes } from "easy-react-router/plugin";
+await genHtmlRoutes({ htmlFile: "dist/index.html" }); // the html file is copied to generate the static routes
+```
+
+<details>
+<summary>Other functions are available in the plugin...</summary>
+
+```ts
+import { genLazyComponent, genRouterInstance } from "easy-react-router/plugin";
+await genRouterInstance(); // generate the router instance
+await genLazyComponent(); // generate the lazy components
+```
+
+</details>
+
 ## Documentation
 
 ### Structure
