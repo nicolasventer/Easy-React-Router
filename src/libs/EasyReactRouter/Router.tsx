@@ -1,5 +1,5 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
-import { batch, effect, signal, useComputed, type ReadonlySignal, type Signal } from "@preact/signals";
+import { batch, effect, signal, type ReadonlySignal, type Signal } from "@preact/signals";
 import type { ComponentPropsWithoutRef, JSX, ReactNode } from "react";
 import { flushSync } from "react-dom";
 import { LazySingleLoaderReturn } from "./lazyLoader";
@@ -388,7 +388,7 @@ export class Router<RoutePath extends string> {
 	 * @returns The component that renders the current route.
 	 */
 	RouterRender = ({ subPath }: { subPath: RoutePathWithSubPaths<PublicRoutePath<RoutePath>> }) => {
-		const Component = useComputed(() => this.getComponentToRender(subPath)).value;
+		const Component = this.getComponentToRender(subPath);
 		return Component ? <Component /> : this.NotFoundRouteRender({ subPath });
 	};
 
