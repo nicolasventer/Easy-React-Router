@@ -58,6 +58,9 @@ _If you weirdly need `/404` in your path, create a folder named `404`. Same for 
 
 ## Installation
 
+**_Unfortunately, the plugin is not yet working with package installation._**
+
+<!--
 Download [vite-plugin-watch-0.4.0.tgz](vite-plugin-watch-0.4.0.tgz?raw=true) and [easy-react-router-1.0.0.tgz](easy-react-router-1.0.0.tgz?raw=true).
 
 ```bash
@@ -75,6 +78,15 @@ export default defineConfig({
 	plugins: [react(), routerPlugin()], // some parameters can be passed to routerPlugin
 });
 ```
+-->
+
+**_The alternative is to use paste the source code of the plugin in your project._**
+
+Download [EasyReactRouter.zip](EasyReactRouter.zip?raw=true) and extract it in your project.
+
+The archive contains a folder name `z_ToCopy`. **Merge the content** of each file with the corresponding file in your project. **Do not replace the files.**
+
+### Usage
 
 If `routes` folder does not exist, the plugin will create it with some example files.  
 And then, you can update the content of `index.tsx` file to render the `MainLayout` component:
@@ -93,6 +105,15 @@ createRoot(document.getElementById("root")!).render(
 
 For building, execute:
 
+```bash
+bun run genHtml
+```
+
+_(command retrieved from `z_ToCopy/package.json` that can be customized)_
+
+<!--
+For building, execute:
+
 ```ts
 import { genHtmlRoutes } from "easy-react-router/plugin";
 await genHtmlRoutes({ htmlFile: "dist/index.html" }); // the html file is copied to generate the static routes
@@ -108,6 +129,7 @@ await genLazyComponent(); // generate the lazy components
 ```
 
 </details>
+ -->
 
 ## Documentation
 

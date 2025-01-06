@@ -2,22 +2,6 @@
 	"name": "easy-react-router",
 	"version": "1.0.0",
 	"description": "File based router for React",
-	"files": [
-		"build"
-	],
-	"main": "build/src/router_src/index.js",
-	"exports": {
-		".": {
-			"import": "./build/index.js",
-			"require": "./build/index.js",
-			"types": "./build/index.d.ts"
-		},
-		"./plugin": {
-			"import": "./build/plugin/routerPlugin.js",
-			"require": "./build/plugin/routerPlugin.js",
-			"types": "./build/plugin/routerPlugin.d.ts"
-		}
-	},
 	"type": "module",
 	"author": "Nicolas VENTER",
 	"license": "MIT",
@@ -30,13 +14,15 @@
 	},
 	"scripts": {
 		"dev": "bun run _genClientEnv.ts && vite",
-		"build": "cross-env B_PROD=true bun run _genClientEnv.ts && bun run _build.ts",
-		"_build": "cross-env B_PROD=true bun run _genClientEnv.ts && tsc -b && vite build",
+		"genHtml": "bun ./src/libs/EasyReactRouter/plugin/_genRoutes.ts --html dist/index.html",
+		"build": "cross-env B_PROD=true bun run _genClientEnv.ts && bun run _build.ts && bun run genHtml",
+		"_build": "cross-env B_PROD=true bun run _genClientEnv.ts && tsc -b && vite build && bun run genHtml",
 		"lint": "eslint .",
 		"preview": "vite preview",
 		"deploy": "bun run _deploy.ts",
 		"buildDeploy": "bun run build && bun run deploy",
-		"buildPkg": "cmd /c \"if exist build rmdir /s /q build\" && cd src/router_src && tsc && cp plugin/_gen*.ts ../../build/plugin && cp -R plugin/sample ../../build/plugin/sample"
+		"buildPkg": "cmd /c \"if exist build rmdir /s /q build\" && cd src/libs/EasyReactRouter && tsc && cp plugin/_gen*.ts ../../../build/plugin && cp -R plugin/sample ../../../build/plugin/sample",
+		"zip": "7z a EasyReactRouter.zip -r src/libs/EasyReactRouter z_ToCopy vite-plugin-watch-0.4.0.tgz"
 	},
 	"dependencies": {
 		"@preact/signals": "2.0.0",

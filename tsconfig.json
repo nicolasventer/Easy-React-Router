@@ -25,9 +25,9 @@
 			"react/jsx-runtime": ["./node_modules/preact/jsx-runtime"],
 			"react-dom": ["./node_modules/preact/compat/"],
 			"react-dom/*": ["./node_modules/preact/compat/*"],
-			"easy-react-router": ["./src/router_src"]
+			"easy-react-router": ["./src/libs/EasyReactRouter"]
 		}
 	},
 	"include": ["src", "_*.ts"],
-	"exclude": ["src/router_src/plugin"]
+	"exclude": ["src/libs/EasyReactRouter/plugin"]
 }

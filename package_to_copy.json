@@ -3,7 +3,7 @@
 	"version": "1.0.0",
 	"description": "File based router for React",
 	"files": ["build"],
-	"main": "build/src/router_src/index.js",
+	"main": "build/index.js",
 	"exports": {
 		".": {
 			"import": "./build/index.js",

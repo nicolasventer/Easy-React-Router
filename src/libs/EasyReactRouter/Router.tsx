@@ -361,9 +361,7 @@ export class Router<RoutePath extends string> {
 	);
 
 	private getComponentToRender = (subPath: RoutePathWithSubPaths<PublicRoutePath<RoutePath>>) => {
-		console.log("subPath:", subPath);
 		const p = this.currentRoute_.value ?? (this.notFoundRoute_.value === subPath ? undefined : this.notFoundRoute_.value);
-		console.log("p:", p);
 		if (!p) return undefined;
 		if (subPath === p) {
 			const SlashComp = this.routes[`${p}/` as RoutePath]?.Component;

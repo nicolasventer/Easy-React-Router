@@ -1,6 +1,5 @@
 import Bun from "bun";
 import fs from "fs";
-import { genHtmlRoutes } from "./src/router_src/plugin/routerPlugin";
 
 fs.rmSync("./dist", { recursive: true, force: true });
 console.log("dist folder removed");
@@ -27,5 +26,3 @@ if (!result.success) {
 console.log("build done");
 fs.copyFileSync("./bun_index.html", "./dist/index.html");
 console.log("bun_index.html copied");
-
-await genHtmlRoutes({ htmlFile: "dist/index.html" });

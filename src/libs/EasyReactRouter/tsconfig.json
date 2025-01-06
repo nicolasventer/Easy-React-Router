@@ -28,7 +28,7 @@
 		},
 
 		"rootDir": "./",
-		"outDir": "../../build",
+		"outDir": "../../../build",
 		"declaration": true
 	},
 
