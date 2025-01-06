@@ -1,5 +1,5 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
-import { batch, effect, signal, type ReadonlySignal, type Signal } from "@preact/signals";
+import { batch, effect, signal, useComputed, type ReadonlySignal, type Signal } from "@preact/signals";
 import type { ComponentPropsWithoutRef, JSX, ReactNode } from "react";
 import { flushSync } from "react-dom";
 import { LazySingleLoaderReturn } from "./lazyLoader";
@@ -201,6 +201,7 @@ export class Router<RoutePath extends string> {
 
 	/** Sets the base route of the router, should be called in the root file of the app (that call render and import the Main Layout component). */
 	setRouterBaseRoute = (value: string) => {
+		if (this.routerBaseRoute === value) return;
 		this.routerBaseRoute = value;
 		this.updateCurrentRoute();
 	};
@@ -360,7 +361,9 @@ export class Router<RoutePath extends string> {
 	);
 
 	private getComponentToRender = (subPath: RoutePathWithSubPaths<PublicRoutePath<RoutePath>>) => {
+		console.log("subPath:", subPath);
 		const p = this.currentRoute_.value ?? (this.notFoundRoute_.value === subPath ? undefined : this.notFoundRoute_.value);
+		console.log("p:", p);
 		if (!p) return undefined;
 		if (subPath === p) {
 			const SlashComp = this.routes[`${p}/` as RoutePath]?.Component;
@@ -386,12 +389,10 @@ export class Router<RoutePath extends string> {
 	 * @param params.subPath The subpath of the router to render, i.e. the path of the route layout.
 	 * @returns The component that renders the current route.
 	 */
-	RouterRender = ({ subPath }: { subPath: RoutePathWithSubPaths<PublicRoutePath<RoutePath>> }) => (
-		<>
-			{this.useRoutes()}
-			{this.getComponentToRender(subPath)?.() ?? this.NotFoundRouteRender({ subPath })}
-		</>
-	);
+	RouterRender = ({ subPath }: { subPath: RoutePathWithSubPaths<PublicRoutePath<RoutePath>> }) => {
+		const Component = useComputed(() => this.getComponentToRender(subPath)).value;
+		return Component ? <Component /> : this.NotFoundRouteRender({ subPath });
+	};
 
 	private NotFoundRouteRender = ({ subPath }: { subPath: RoutePathWithSubPaths<PublicRoutePath<RoutePath>> }) =>
 		this.notFoundRoutes[subPath]?.Component() ?? null;

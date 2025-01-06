@@ -1,0 +1,33 @@
+{
+	"name": "easy-react-router",
+	"version": "1.0.0",
+	"description": "File based router for React",
+	"files": ["build"],
+	"main": "build/src/router_src/index.js",
+	"exports": {
+		".": {
+			"import": "./build/index.js",
+			"require": "./build/index.js",
+			"types": "./build/index.d.ts"
+		},
+		"./plugin": {
+			"import": "./build/plugin/routerPlugin.js",
+			"require": "./build/plugin/routerPlugin.js",
+			"types": "./build/plugin/routerPlugin.d.ts"
+		}
+	},
+	"type": "module",
+	"author": "Nicolas VENTER",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/nicolasventer/Easy-React-Router.git"
+	},
+	"bugs": {
+		"url": "https://github.com/nicolasventer/Easy-React-Router/issues"
+	},
+	"dependencies": {
+		"@preact/signals": "2.0.0",
+		"vite-plugin-watch": "vite-plugin-watch-0.4.0.tgz"
+	}
+}

@@ -1,19 +1,35 @@
 {
 	"compilerOptions": {
 		"target": "ES2020",
-		"module": "commonjs",
-		"rootDir": "./",
-		"outDir": "../../build",
-		"esModuleInterop": true,
-		"forceConsistentCasingInFileNames": true,
-		"strict": true,
+		// "useDefineForClassFields": true,
+		"lib": ["ES2020", "DOM", "DOM.Iterable"],
+		"module": "ESNext",
 		"skipLibCheck": true,
-		"declaration": true,
 
 		/* Bundler mode */
+		"moduleResolution": "Bundler",
 		"isolatedModules": true,
 		"moduleDetection": "force",
-		"jsx": "react-jsx"
+		"jsx": "react-jsx",
+		"esModuleInterop": true,
+
+		/* Linting */
+		"strict": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noFallthroughCasesInSwitch": true,
+		"noUncheckedSideEffectImports": true,
+
+		"paths": {
+			"react": ["./node_modules/preact/compat/"],
+			"react/jsx-runtime": ["./node_modules/preact/jsx-runtime"],
+			"react-dom": ["./node_modules/preact/compat/"],
+			"react-dom/*": ["./node_modules/preact/compat/*"]
+		},
+
+		"rootDir": "./",
+		"outDir": "../../build",
+		"declaration": true
 	},
 
 	"exclude": ["./plugin/_gen*", "./plugin/sample", "./tests"]
