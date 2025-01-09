@@ -1,5 +1,3 @@
-**This branch is provide the installation through a zip extraction. But it should not be needed anymore since package installation is now working.**
-
 # Easy-React-Router
 
 `Easy-React-Router` is an implementation of a file based Router for React.
@@ -60,8 +58,6 @@ _If you weirdly need `/404` in your path, create a folder named `404`. Same for 
 
 ## Installation
 
-### With package (recommended)
-
 Download [vite-plugin-watch-0.4.0.tgz](vite-plugin-watch-0.4.0.tgz?raw=true) and [easy-react-router-1.0.0.tgz](easy-react-router-1.0.0.tgz?raw=true).
 
 ```bash
@@ -89,12 +85,6 @@ Add `genHtml` to `package.json`:
 	}
 }
 ```
-
-### With zip
-
-Download [EasyReactRouter.zip](EasyReactRouter.zip?raw=true) and extract it in your project.
-
-The archive contains a folder name `z_ToCopy`. **Merge the content** of each file with the corresponding file in your project. **Do not replace the files.**
 
 ### Usage
 

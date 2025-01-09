@@ -21,8 +21,7 @@
 		"preview": "vite preview",
 		"deploy": "bun run _deploy.ts",
 		"buildDeploy": "bun run build && bun run deploy",
-		"buildPkg": "cmd /c \"if exist build rmdir /s /q build\" && cd src/libs/EasyReactRouter && tsc && cp plugin/_gen*.ts ../../../build/plugin && cp -R plugin/sample ../../../build/plugin/sample",
-		"zip": "7z a EasyReactRouter.zip -r src/libs/EasyReactRouter z_ToCopy vite-plugin-watch-0.4.0.tgz"
+		"buildPkg": "cmd /c \"if exist build rmdir /s /q build\" && cd src/libs/EasyReactRouter && tsc && cp plugin/_gen*.ts ../../../build/plugin && cp -R plugin/sample ../../../build/plugin/sample"
 	},
 	"dependencies": {
 		"@preact/signals": "2.0.0",
