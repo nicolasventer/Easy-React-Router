@@ -1,5 +1,0 @@
-{
-	"scripts": {
-		"genHtml": "bun ./src/libs/EasyReactRouter/build/plugin/_genRoutes.ts --html dist/index.html"
-	}
-}
