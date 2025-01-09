@@ -1,3 +1,5 @@
+**This branch is provide the installation through a zip extraction. But it should not be needed anymore since package installation is now working.**
+
 # Easy-React-Router
 
 `Easy-React-Router` is an implementation of a file based Router for React.
@@ -58,9 +60,8 @@ _If you weirdly need `/404` in your path, create a folder named `404`. Same for 
 
 ## Installation
 
-**_Unfortunately, the plugin is not yet working with package installation._**
+### With package (recommended)
 
-<!--
 Download [vite-plugin-watch-0.4.0.tgz](vite-plugin-watch-0.4.0.tgz?raw=true) and [easy-react-router-1.0.0.tgz](easy-react-router-1.0.0.tgz?raw=true).
 
 ```bash
@@ -78,9 +79,18 @@ export default defineConfig({
 	plugins: [react(), routerPlugin()], // some parameters can be passed to routerPlugin
 });
 ```
--->
 
-**_The alternative is to use paste the source code of the plugin in your project._**
+Add `genHtml` to `package.json`:
+
+```json
+{
+	"scripts": {
+		"genHtml": "bun ./node_modules/easy-react-router/plugin/_genRoutes.ts --html dist/index.html"
+	}
+}
+```
+
+### With zip
 
 Download [EasyReactRouter.zip](EasyReactRouter.zip?raw=true) and extract it in your project.
 
@@ -109,18 +119,19 @@ For building, execute:
 bun run genHtml
 ```
 
-_(command retrieved from `z_ToCopy/package.json` that can be customized)_
+_(command to manually add to `package.json` that can be customized)_
 
-<!--
-For building, execute:
+<details>
+<summary>Alternative</summary>
+
+Alternatively, you can create a typescript file with the following content:
 
 ```ts
 import { genHtmlRoutes } from "easy-react-router/plugin";
 await genHtmlRoutes({ htmlFile: "dist/index.html" }); // the html file is copied to generate the static routes
 ```
 
-<details>
-<summary>Other functions are available in the plugin...</summary>
+Other functions are available in the plugin...
 
 ```ts
 import { genLazyComponent, genRouterInstance } from "easy-react-router/plugin";
@@ -129,7 +140,6 @@ await genLazyComponent(); // generate the lazy components
 ```
 
 </details>
- -->
 
 ## Documentation
 
@@ -170,6 +180,8 @@ await genLazyComponent(); // generate the lazy components
   - `notFoundRoute`: Route that is rendered when no route is found.
   - `loadRouteFn`: Function to trigger the loading of a route (could be use on hover for example).
   - `RouteLink`: Component to create a link to a route.
+  - `navigateToCustomRouteFn`: Function to navigate to a custom url and update the current route.
+  - `RouteCustomLink`: Component to create a link to a custom url.
   - `setUseRouteTransition`: Function to set the use of the document transition API.
   - `updateCurrentRoute`: Function that updates the current route according to the current url.
   - `buildRouteLink`: Function to build a link to a route.
@@ -177,12 +189,11 @@ await genLazyComponent(); // generate the lazy components
 
 ### Deployment
 
-After building the project, pass the main `index.html` to the command:  
-`bun _genRoutes.ts --html <path-to-index.html>`.  
+After building the project, execute `bun run genHtml` (with the correct path to the `index.html` file).
 This will generate a [`staticRoutes.yaml`](staticRoutes.yaml) file that will be used to generate copies of the `index.html` file with the correct paths.  
 You can manually edit the `staticRoutes.yaml` file to add more routes.  
 By default, the `staticRoutes.yaml` file is not overwritten. Use the `--overwrite` flag to overwrite it  
-(like this: `bun _genRoutes.ts --html <path-to-index.html> --overwrite`).
+(like this: `bun run genHtml -- --overwrite`). (The `--` is needed to pass the flag to the script.)
 
 # Lazy-Component-Loader
 
