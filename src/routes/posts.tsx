@@ -1,4 +1,4 @@
-import { B_PROD } from "../_bProd";
+import { B_PROD } from "../bProd.gen";
 import { clientEnv } from "../clientEnv";
 import { currentRoute, getRouteParams, RouteCustomLink, RouteLink, RouterRender } from "../routerInstance.gen";
 

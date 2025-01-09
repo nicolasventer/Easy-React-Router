@@ -1,17 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { type ReadonlySignal, signal } from "@preact/signals";
-import { type FunctionComponent, lazy, Suspense } from "react";
-
-type Params<T> = T extends (...args: [infer U]) => any ? U : Record<string, never>;
-
-const Suspender = <T extends (...args: any) => any>(Comp: T) => {
-	const Suspended = (props: Params<T>) => (
-		<Suspense fallback>
-			<Comp {...props} />
-		</Suspense>
-	);
-	return Suspended;
-};
+import { type FunctionComponent, useEffect, useState } from "react";
 
 type FCKeys<T extends object> = { [K in keyof T]: T[K] extends FunctionComponent<any> ? K : never }[keyof T];
 
@@ -26,21 +15,21 @@ export type LoadingState = "notStarted" | "loading" | "loaded";
  */
 export const lazyLoader = <T extends object>(importFn: () => Promise<T>) => {
 	const loadingState = signal<LoadingState>("notStarted");
-	const mod_ = signal<T>();
 
 	const load = () => {
-		if (!mod_.value) {
-			loadingState.value = "loading";
-			return importFn()
-				.then((m) => (mod_.value = m))
-				.then(() => (loadingState.value = "loaded"))
-				.then(() => mod_.value!);
-		}
-		return new Promise<T>((resolve) => resolve(mod_.value!));
+		if (loadingState.value === "notStarted") loadingState.value = "loading";
+		return importFn().then((m) => {
+			loadingState.value = "loaded";
+			return m;
+		});
 	};
 
 	const getComponent = <U extends FCKeys<T>>(key: U) =>
-		Suspender(lazy(() => load().then((modValue) => ({ default: modValue[key] as FunctionComponent })))) as T[U];
+		((params: unknown) => {
+			const [Module, setModule] = useState<T>();
+			useEffect(() => void load().then(setModule), []);
+			return Module ? (Module[key] as any)(params) : undefined;
+		}) as T[U];
 
 	return {
 		/** The function to get the component. */
@@ -77,21 +66,6 @@ export const lazySingleLoader = <T extends object, U extends FCKeys<T>>(
 	importFn: () => Promise<T>,
 	key: U
 ): LazySingleLoaderReturn<T[U]> => {
-	const loadingState = signal<LoadingState>("notStarted");
-	const mod_ = signal<T>();
-
-	const load = () => {
-		if (!mod_.value) {
-			loadingState.value = "loading";
-			return importFn()
-				.then((m) => (mod_.value = m))
-				.then(() => (loadingState.value = "loaded"))
-				.then(() => mod_.value!);
-		}
-		return new Promise<T>((resolve) => resolve(mod_.value!));
-	};
-
-	const Component = Suspender(lazy(() => load().then((modValue) => ({ default: modValue[key] as FunctionComponent })))) as T[U];
-
-	return { Component, load, loadingState: loadingState as ReadonlySignal<LoadingState> };
+	const { getComponent, load, loadingState } = lazyLoader(importFn);
+	return { Component: getComponent(key), load, loadingState };
 };

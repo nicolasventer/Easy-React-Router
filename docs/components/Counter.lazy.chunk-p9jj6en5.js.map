@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "sources": ["..\\src\\components\\Counter.lazy.tsx"],
+  "sourcesContent": [
+    "import { useState } from \"react\";\r\n\r\nexport const Counter = () => {\r\n\tconst [count, setCount] = useState(0);\r\n\r\n\treturn <button onClick={() => setCount(count + 1)}>Count: {count}</button>;\r\n};\r\n"
+  ],
+  "mappings": "6FAEO,KAAM,EAAU,IAAM,CAC5B,IAAO,EAAO,GAAY,EAAS,CAAC,EAEpC,OAAO,EAA4D,SAA5D,CAAQ,QAAS,IAAM,EAAS,EAAQ,CAAC,EAAzC,SAA4D,CAA5D,UAAoD,IAApD,qBAA4D",
+  "debugId": "CCBC11AB739F2CFE64756E2164756E21",
+  "names": []
+}

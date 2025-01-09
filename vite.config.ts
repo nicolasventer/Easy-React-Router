@@ -1,12 +1,11 @@
-import react from "@vitejs/plugin-react";
+import preact from "@preact/preset-vite";
 import path from "path";
 import { defineConfig } from "vite";
 import { routerPlugin } from "./src/libs/EasyReactRouter/plugin/routerPlugin";
 
-// https://vite.dev/config/
 export default defineConfig({
 	base: "./",
-	plugins: [react(), routerPlugin({ lazyComponent: { eslintDisableWarning: true } })],
+	plugins: [preact(), routerPlugin({ lazyComponent: { eslintDisableWarning: true } })],
 	resolve: {
 		alias: {
 			"easy-react-router": path.resolve(__dirname, "src/libs/EasyReactRouter"),

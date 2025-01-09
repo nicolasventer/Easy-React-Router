@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "sources": ["..\\src\\routes\\404.tsx"],
+  "sourcesContent": [
+    "export const NotFound = () => <div>Not Found</div>;\r\n"
+  ],
+  "mappings": "+CAAO,IAAM,EAAW,IAAM,EAAgB,MAAhB,4CAAgB",
+  "debugId": "B9D55144E51B474564756E2164756E21",
+  "names": []
+}

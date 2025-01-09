@@ -22,5 +22,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-_bProd.ts
+bProd.gen.ts
 build

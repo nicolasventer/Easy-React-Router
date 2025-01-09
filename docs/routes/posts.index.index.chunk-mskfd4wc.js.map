@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "sources": ["..\\src\\routes\\posts.index.index.tsx"],
+  "sourcesContent": [
+    "export const PostWithoutId = () => <div>Select a post.</div>;\r\n"
+  ],
+  "mappings": "+CAAO,IAAM,EAAgB,IAAM,EAAqB,MAArB,iDAAqB",
+  "debugId": "092B0C77056D5FAC64756E2164756E21",
+  "names": []
+}

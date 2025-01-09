@@ -1,4 +1,4 @@
-import { B_PROD } from "./_bProd";
+import { B_PROD } from "./bProd.gen";
 
 /** the client environment */
 export type ClientEnv = {
