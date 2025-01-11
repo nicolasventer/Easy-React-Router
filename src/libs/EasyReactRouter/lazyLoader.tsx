@@ -28,7 +28,9 @@ export const lazyLoader = <T extends object>(importFn: () => Promise<T>) => {
 		((params: unknown) => {
 			const [Module, setModule] = useState<T>();
 			useEffect(() => void load().then(setModule), []);
-			return Module ? (Module[key] as any)(params) : undefined;
+			const M = Module ? Module[key] : () => null;
+			// @ts-expect-error the type of the component and of the parameters are unknown
+			return <M {...params} />;
 		}) as T[U];
 
 	return {

@@ -1,4 +1,4 @@
-/* eslint-disable no-mixed-spaces-and-tabs */
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 import { batch, effect, signal, type ReadonlySignal, type Signal } from "@preact/signals";
 import type { ComponentPropsWithoutRef, JSX, ReactNode } from "react";
 import { flushSync } from "react-dom";
@@ -233,6 +233,7 @@ export class Router<RoutePath extends string> {
 		this.currentRoute_.value = routeRegex.path as PublicRoutePath<RoutePath>;
 		this.notFoundRoute_.value = undefined;
 		const params = path.match(routeRegex.regex)!.slice(1);
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const routeParams = {} as any;
 		routeRegex.keys.forEach((key, i) => (routeParams[key] = params[i]));
 		const searchParams = new URLSearchParams(url.search);
@@ -388,10 +389,10 @@ export class Router<RoutePath extends string> {
 	 * @returns The component that renders the current route.
 	 */
 	RouterRender = ({ subPath }: { subPath: RoutePathWithSubPaths<PublicRoutePath<RoutePath>> }) => {
-		const Component = this.getComponentToRender(subPath);
-		return Component ? <Component /> : this.NotFoundRouteRender({ subPath });
+		const Component = this.getComponentToRender(subPath) ?? this.NotFoundRouteRender({ subPath });
+		return <Component />;
 	};
 
 	private NotFoundRouteRender = ({ subPath }: { subPath: RoutePathWithSubPaths<PublicRoutePath<RoutePath>> }) =>
-		this.notFoundRoutes[subPath]?.Component() ?? null;
+		this.notFoundRoutes[subPath]?.Component ?? (() => null);
 }

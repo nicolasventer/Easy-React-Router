@@ -1,4 +1,4 @@
-/* eslint-disable no-mixed-spaces-and-tabs */
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 
 /**
  * @notExported
@@ -187,6 +187,7 @@ export class RouterTest<RoutePath extends string> {
 		}
 		const currentRoute = routeRegex.path as PublicRoutePath<RoutePath>;
 		const params = path.match(routeRegex.regex)!.slice(1);
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const routeParams = {} as any;
 		routeRegex.keys.forEach((key, i) => (routeParams[key] = params[i]));
 		const searchParams = new URLSearchParams(url.search);
