@@ -6,7 +6,6 @@ import {
 	loadRouteFn,
 	RouteLink,
 	RouterRender,
-	useRoutes,
 	type RouterParamsType,
 	type RouterPathType,
 } from "../routerInstance.gen";
@@ -31,7 +30,6 @@ const navigationItems = [
 // @routeExport
 export const MainLayout = () => (
 	<div>
-		{useRoutes()}
 		<div style={{ display: "flex", gap: 10, borderBottom: "solid" }}>
 			{navigationItems.map(({ title, path, params }) => (
 				<RouteLink

@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "sources": ["..\\src\\routes\\posts.3.tsx"],
+  "sourcesContent": [
+    "export const PostWithId3 = () => <h3 style={{ backgroundColor: \"lime\" }}>This is the special 3rd post.</h3>;\r\n"
+  ],
+  "mappings": "qEAAa,EAAc,IAAM,SAAuE,KAAvE,CAAI,MAAO,CAAE,gBAAiB,MAAO,EAArC,+DAAuE",
+  "debugId": "646957DE2B4D3A2564756E2164756E21",
+  "names": []
+}

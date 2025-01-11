@@ -1,7 +1,8 @@
 {
 	"compilerOptions": {
 		"paths": {
-			"easy-react-router": ["./src/libs/EasyReactRouter"]
+			"easy-react-router": ["./src/libs/EasyReactRouter"],
+			"@preact/signals": ["./node_modules/@preact/signals-react/"]
 		}
 	},
 	"exclude": ["src/libs/EasyReactRouter/plugin"]

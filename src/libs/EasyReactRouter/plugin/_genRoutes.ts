@@ -286,7 +286,6 @@ export const {
 	setRouterBaseRoute,
 	setUseRouteTransition,
 	updateCurrentRoute,
-	useRoutes,
 } = new Router(
 	{\n`;
 

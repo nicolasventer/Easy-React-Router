@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 import { batch, effect, signal, type ReadonlySignal, type Signal } from "@preact/signals";
-import type { ComponentPropsWithoutRef, JSX, ReactNode } from "react";
+import type { ComponentPropsWithoutRef, JSX } from "react";
 import { flushSync } from "react-dom";
 import { LazySingleLoaderReturn } from "./lazyLoader";
-import { useReact } from "./useReact";
 
 /**
  * @notExported
@@ -188,16 +187,6 @@ export class Router<RoutePath extends string> {
 		if (urlSignal) effect(() => this.updateCurrentRoute());
 		else window.addEventListener("popstate", () => this.updateCurrentRoute());
 	}
-
-	/** Hook need in React that should be called in the Main Layout component if its render depends on current route or loading state. */
-	useRoutes = () => {
-		useReact(this.currentRoute_);
-		useReact(this.notFoundRoute_);
-		useReact(this.routeParams_);
-		// eslint-disable-next-line react-hooks/rules-of-hooks
-		for (const route of Object.values(this.routes)) useReact((route as LazySingleLoaderReturn<() => ReactNode>).loadingState);
-		return null;
-	};
 
 	/** Sets the base route of the router, should be called in the root file of the app (that call render and import the Main Layout component). */
 	setRouterBaseRoute = (value: string) => {

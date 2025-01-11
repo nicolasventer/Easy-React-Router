@@ -1,5 +1,5 @@
 import { signal } from "@preact/signals";
-import { Router, lazySingleLoader, useReact } from "easy-react-router";
+import { Router, lazySingleLoader } from "easy-react-router";
 import type { FormEventHandler } from "react";
 
 const aboutRouterSignal = signal("/");
@@ -21,7 +21,7 @@ export const About = () => (
 	<div>
 		<div>About</div>
 		<div>
-			<input type="text" value={useReact(aboutRouterSignal)} onInput={updateAboutRouterSignal} />
+			<input type="text" value={aboutRouterSignal.value} onInput={updateAboutRouterSignal} />
 			<div>Current route: {AboutRouter.currentRoute.value}</div>
 		</div>
 		<div>

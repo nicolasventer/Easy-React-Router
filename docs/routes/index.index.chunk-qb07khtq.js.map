@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "sources": ["..\\src\\routes\\index.index.tsx"],
+  "sourcesContent": [
+    "import { Counter } from \"../components/Counter\";\r\n\r\nexport const Home = () => (\r\n\t<div>\r\n\t\tHome\r\n\t\t<div>\r\n\t\t\t<Counter />\r\n\t\t</div>\r\n\t</div>\r\n);\r\n"
+  ],
+  "mappings": "kKAEa,GAAO,KACnB,SAKE,MALF,UAKE,CALF,OAEC,SAEE,MAFF,UACC,SAAC,EAAD,wBAAS,GADV,qBAEE,IAJH,qBAKE",
+  "debugId": "FF309E2639ADB45764756E2164756E21",
+  "names": []
+}

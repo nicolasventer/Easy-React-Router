@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "sources": ["..\\src\\components\\DebounceTextInput.tsx"],
+  "sourcesContent": [
+    "import { useMemo, useState } from \"react\";\r\n\r\nconst debounceFn = <T extends unknown[]>(fn: (...args: T) => void, delay: number) => {\r\n\tlet timeoutId: Timer | undefined;\r\n\treturn (...args: T) => {\r\n\t\tif (timeoutId !== undefined) clearTimeout(timeoutId);\r\n\t\ttimeoutId = setTimeout(() => fn(...args), delay);\r\n\t};\r\n};\r\n\r\nexport const DebounceTextInput = () => {\r\n\tconst [debouncedValue, setDebouncedValue] = useState(\"\");\r\n\tconst debouncedUpdate = useMemo(() => debounceFn(setDebouncedValue, 500), []);\r\n\treturn (\r\n\t\t<div>\r\n\t\t\t<input type=\"text\" onInput={(e) => debouncedUpdate(e.currentTarget.value)} />\r\n\t\t\t<div>Debounced value: {debouncedValue}</div>\r\n\t\t</div>\r\n\t);\r\n};\r\n"
+  ],
+  "mappings": "6DAAA,0BAEM,EAAa,CAAsB,EAA0B,IAAkB,CACpF,IAAI,EACJ,MAAO,IAAI,IAAY,CACtB,GAAI,IAAc,OAAW,aAAa,CAAS,EACnD,EAAY,WAAW,IAAM,EAAG,GAAG,CAAI,EAAG,CAAK,IAIpC,EAAoB,IAAM,CACtC,IAAO,EAAgB,GAAqB,WAAS,EAAE,EACjD,EAAkB,UAAQ,IAAM,EAAW,EAAmB,GAAG,EAAG,CAAC,CAAC,EAC5E,OACC,SAGE,MAHF,UAGE,CAFD,SAAC,QAAD,CAAO,KAAK,OAAO,QAAS,CAAC,IAAM,EAAgB,EAAE,cAAc,KAAK,GAAxE,qBAA2E,EAC3E,SAAwC,MAAxC,UAAwC,CAAxC,oBAAuB,IAAvB,qBAAwC,IAFzC,qBAGE",
+  "debugId": "9B0E08F8DC9CDBF564756E2164756E21",
+  "names": []
+}

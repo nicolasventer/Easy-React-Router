@@ -20,7 +20,6 @@ export const {
 	setRouterBaseRoute,
 	setUseRouteTransition,
 	updateCurrentRoute,
-	useRoutes,
 } = new Router(
 	{
 		[checkValidRoute("/about")]: lazySingleLoader(() => import("./routes/about"), "About"),
