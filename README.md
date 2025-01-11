@@ -1,5 +1,7 @@
 **This branch is provide the installation through a zip extraction. But it should not be needed anymore since package installation is now working.**
 
+**This branch use preact instead of react.**
+
 # Easy-React-Router
 
 `Easy-React-Router` is an implementation of a file based Router for React.

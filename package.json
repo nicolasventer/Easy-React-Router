@@ -25,25 +25,24 @@
 		"zip": "7z a EasyReactRouter.zip -r src/libs/EasyReactRouter z_ToCopy vite-plugin-watch-0.4.0.tgz"
 	},
 	"dependencies": {
-		"@preact/signals": "npm:@preact/signals-react",
-		"@preact/signals-react": "3.0.0",
-		"@preact/signals-react-transform": "0.5.1",
+		"@preact/signals": "2.0.0",
 		"vite-plugin-watch": "vite-plugin-watch-0.4.0.tgz"
 	},
 	"devDependencies": {
 		"@eslint/js": "9.17.0",
+		"@preact/preset-vite": "2.9.4",
 		"@types/bun": "1.1.16",
 		"@types/node": "22.10.5",
 		"@types/react": "19.0.4",
 		"@types/react-dom": "19.0.2",
-		"@vitejs/plugin-react": "4.3.4",
 		"cross-env": "7.0.3",
 		"eslint": "9.17.0",
 		"eslint-plugin-react-hooks": "5.1.0",
 		"eslint-plugin-react-refresh": "0.4.16",
 		"globals": "15.14.0",
-		"react": "19.0.0",
-		"react-dom": "19.0.0",
+		"preact": "10.25.4",
+		"react": "npm:@preact/compat",
+		"react-dom": "npm:@preact/compat",
 		"typescript-eslint": "8.19.1"
 	}
 }

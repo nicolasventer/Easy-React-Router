@@ -27,9 +27,7 @@
 		"url": "https://github.com/nicolasventer/Easy-React-Router/issues"
 	},
 	"dependencies": {
-		"@preact/signals": "npm:@preact/signals-react",
-		"@preact/signals-react": "3.0.0",
-		"@preact/signals-react-transform": "0.5.1",
+		"@preact/signals": "2.0.0",
 		"vite-plugin-watch": "vite-plugin-watch-0.4.0.tgz"
 	}
 }
