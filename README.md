@@ -85,7 +85,7 @@ Add `genHtml` to `package.json`:
 ```json
 {
 	"scripts": {
-		"genHtml": "bun ./node_modules/easy-react-router/plugin/_genRoutes.ts --html dist/index.html"
+		"genHtml": "bun run ./node_modules/easy-react-router/plugin/_genRoutes.ts --html dist/index.html"
 	}
 }
 ```
