@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { type ReadonlySignal, signal } from "@preact/signals";
-import { type FunctionComponent, useEffect, useState } from "react";
+import { type FunctionComponent, useEffect } from "react";
+import { useReact } from "./useReact";
 
 type FCKeys<T extends object> = { [K in keyof T]: T[K] extends FunctionComponent<any> ? K : never }[keyof T];
 
@@ -15,20 +16,23 @@ export type LoadingState = "notStarted" | "loading" | "loaded";
  */
 export const lazyLoader = <T extends object>(importFn: () => Promise<T>) => {
 	const loadingState = signal<LoadingState>("notStarted");
+	const allModules = signal<T | null>(null);
 
 	const load = () => {
+		if (allModules.value) return Promise.resolve(allModules.value);
 		if (loadingState.value === "notStarted") loadingState.value = "loading";
 		return importFn().then((m) => {
 			loadingState.value = "loaded";
+			allModules.value = m;
 			return m;
 		});
 	};
 
 	const getComponent = <U extends FCKeys<T>>(key: U) =>
 		((params: unknown) => {
-			const [Module, setModule] = useState<T>();
-			useEffect(() => void load().then(setModule), []);
-			const M = Module ? Module[key] : () => null;
+			useReact(allModules);
+			useEffect(() => void load(), []);
+			const M = allModules.value ? allModules.value[key] : () => null;
 			// @ts-expect-error the type of the component and of the parameters are unknown
 			return <M {...params} />;
 		}) as T[U];
