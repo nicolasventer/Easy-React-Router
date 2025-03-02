@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 import { batch, effect, signal, type ReadonlySignal, type Signal } from "@preact/signals";
-import type { ComponentPropsWithoutRef, JSX, ReactNode } from "react";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { flushSync } from "react-dom";
-import { LazySingleLoaderReturn } from "./lazyLoader";
+import type { LazySingleLoaderReturn } from "./lazyLoader";
 import { useReact } from "./useReact";
 
 /**
- * @notExported
  * Type to split a path into its parts.
  * @template {string} T The type of the route paths.
  */
@@ -21,7 +20,6 @@ type SplitPath<T extends string, Prefix extends ":" | "?" | "/" | "" = ""> = T e
 	: `${Prefix}${T}`;
 
 /**
- * @notExported
  * Type to get the parameters of a route path.
  * @template {string} T The type of the route paths.
  */
@@ -36,14 +34,10 @@ type RouteParams_<T extends string> = (SplitPath<T> & `:${string}` extends never
 				[K in SplitPath<T> & `?${string}` extends `?${infer L}` ? L : never]?: string;
 		  });
 
-/**
- * @notExported
- * Type of a registered route.
- */
-type RouteValue = LazySingleLoaderReturn<() => JSX.Element>;
+/** Type of a registered route. */
+type RouteValue = LazySingleLoaderReturn<() => ReactNode>;
 
 /**
- * @notExported
  * Type to store the routes of the app. \
  * The keys are the paths of the routes and the values are the components of the routes.
  * @template {string} T The type of the route paths.
@@ -60,7 +54,6 @@ type Routes<T extends string> = Record<T, RouteValue>;
 export type RouteParams<RoutePath extends string> = RouteParams_<RoutePath>;
 
 /**
- * @notExported
  * Type to get the route path that should be accessible to the public.
  * @template {string} RoutePath The type of the route paths.
  */
@@ -71,7 +64,6 @@ type PublicRoutePath<RoutePath extends string> = RoutePath extends "/"
 	: RoutePath;
 
 /**
- * @notExported
  * Type of the parameters of the build link function. `params` is optional if the route has no parameters.
  * @template {string} RoutePath The type of the route paths.
  */
@@ -99,7 +91,6 @@ export type LinkProps<RoutePath extends string> = keyof RouteParams<RoutePath> e
 	  };
 
 /**
- * @notExported
  * Type to get the subpaths of a route path.
  * @template {string} RoutePath The type of the route paths.
  * @example

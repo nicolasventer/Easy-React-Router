@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 
 if (Bun.argv.includes("--help") || Bun.argv.includes("--usage")) {
-	console.log(`Usage: node _genRoute.ts [--json] [--html [htmlFile] [--overwrite]] [--force]
+	console.log(`Usage: bun _genRoute.ts [--json] [--html [htmlFile] [--overwrite]] [--force]
 	--json: Additionally generate json file
 	--html: Generate static routes file and corresponding html files (instead of router instance file)
 		htmlFile: Path to html file to duplicate for each route
@@ -265,7 +265,7 @@ if (Bun.argv.includes("--html")) {
 	// generate ROUTER_INSTANCE_FILE
 
 	let routerInstanceContent = `// ${hashValue}
-import { checkValidRoute, lazySingleLoader, RouteParams, Router } from "easy-react-router";
+import { checkValidRoute, lazySingleLoader, type RouteParams, Router } from "easy-react-router";
 
 export const {
 	RouteCustomLink,

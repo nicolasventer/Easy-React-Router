@@ -32,9 +32,9 @@ This project also includes [`Lazy-Component-Loader`](#lazy-component-loader) whi
 
 ## File based routing
 
-This table shows the equivalence between routes and their respective path.
+This table shows the equivalence between the file path and the route path.
 
-`/` in `File path` is `routes` directory.
+`/` in `File path` is the `src/routes` directory.
 
 | File path                         | Route Path                         | Example                     |
 | --------------------------------- | ---------------------------------- | --------------------------- |
@@ -98,7 +98,7 @@ The archive contains a folder name `z_ToCopy`. **Merge the content** of each fil
 
 ### Usage
 
-If `routes` folder does not exist, the plugin will create it with some example files.  
+If the `routes` folder does not exist, the plugin will create it with some example files.  
 And then, you can update the content of `index.tsx` file to render the `MainLayout` component:
 
 ```tsx
@@ -156,7 +156,7 @@ await genLazyComponent(); // generate the lazy components
 - <details>
   <summary>More...</summary>
 
-  - if many exports, add `// @routeExport` comment to specify the export to use for the route.
+  - if many exports, add the `// @routeExport` comment to specify the export to use for the route.
   - use `--json` to additionally generate a JSON file with the result of the parsing
   - use `--force` to force the regeneration of the router instance
 

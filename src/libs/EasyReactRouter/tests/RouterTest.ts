@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 
 /**
- * @notExported
  * Type to split a path into its parts.
  * @template {string} T The type of the route paths.
  */
@@ -16,7 +15,6 @@ type SplitPath<T extends string, Prefix extends ":" | "?" | "/" | "" = ""> = T e
 	: `${Prefix}${T}`;
 
 /**
- * @notExported
  * Type to get the parameters of a route path.
  * @template {string} T The type of the route paths.
  */
@@ -32,7 +30,6 @@ type RouteParams_<T extends string> = (SplitPath<T> & `:${string}` extends never
 		  });
 
 /**
- * @notExported
  * Type of the parameters of a route path.
  * `params` is optional if the route has no parameters.
  * @template {string} RoutePath The type of the route paths.
@@ -42,7 +39,6 @@ type RouteParams_<T extends string> = (SplitPath<T> & `:${string}` extends never
 type RouteParams<RoutePath extends string> = RouteParams_<RoutePath>;
 
 /**
- * @notExported
  * Type to get the route path that should be accessible to the public.
  * @template {string} RoutePath The type of the route paths.
  */
@@ -53,7 +49,6 @@ type PublicRoutePath<RoutePath extends string> = RoutePath extends "/"
 	: RoutePath;
 
 /**
- * @notExported
  * Type of the parameters of the build link function. `params` is optional if the route has no parameters.
  * @template {string} RoutePath The type of the route paths.
  */
@@ -62,7 +57,6 @@ type BuildLinkParams<RoutePath extends string> = keyof RouteParams<RoutePath> ex
 	: [path: RoutePath, params: RouteParams<RoutePath>];
 
 /**
- * @notExported
  * Type to get the subpaths of a route path.
  * @template {string} RoutePath The type of the route paths.
  * @example
@@ -81,7 +75,6 @@ type RoutePathWithSubPaths<RoutePath extends string> = {
 }[RoutePath];
 
 /**
- * @notExported
  * Type of the output of getCurrentRoute.
  * @template {string} RoutePath The type of the route paths.
  */
@@ -93,7 +86,6 @@ type CurrentRouteOutput<RoutePath extends string> = {
 };
 
 /**
- * @notExported
  * Type of the routeParams of the output of getCurrentRoute.
  * @template {string} RoutePath The type of the route paths.
  */

@@ -1,7 +1,4 @@
-/**
- * @notExported
- * Type to check if the route is valid
- */
+/** Type to check if the route is valid */
 type ValidRoute<T extends Readonly<string>> = T extends `${infer _}?${infer _}/${infer _}` ? never : T;
 
 /** Check if the route is valid */

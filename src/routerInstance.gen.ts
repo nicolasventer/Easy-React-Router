@@ -1,5 +1,5 @@
 // 925bfb6cb770283b793f97edbb1842ba2a4b14468e0861a9055ededdf94793ba
-import { checkValidRoute, lazySingleLoader, RouteParams, Router } from "easy-react-router";
+import { checkValidRoute, lazySingleLoader, type RouteParams, Router } from "easy-react-router";
 
 export const {
 	RouteCustomLink,
