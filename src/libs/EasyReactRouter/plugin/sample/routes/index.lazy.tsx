@@ -1,9 +1,8 @@
-import { RouteLink, RouterRender, useRoutes } from "../routerInstance.gen";
+import { RouteLink, RouterRender } from "../routerInstance.gen";
 
 // @routeExport
 export const MainLayout = () => (
 	<div>
-		{useRoutes()}
 		<div style={{ display: "flex", gap: 10, borderBottom: "solid" }}>
 			<RouteLink path="/">
 				<h3>Home</h3>
@@ -16,7 +15,7 @@ export const MainLayout = () => (
 			</RouteLink>
 		</div>
 		<div style={{ paddingTop: 10 }}>
-			<RouterRender subPath="/" />
+			<RouterRender subPath="/" useReact />
 		</div>
 	</div>
 );

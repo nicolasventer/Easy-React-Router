@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 import { batch, effect, signal, type ReadonlySignal, type Signal } from "@preact/signals";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
@@ -180,12 +181,11 @@ export class Router<RoutePath extends string> {
 		else window.addEventListener("popstate", () => this.updateCurrentRoute());
 	}
 
-	/** Hook need in React that should be called in the Main Layout component if its render depends on current route or loading state. */
+	/** Hook needed in React that should be called in order to force the re-render when the current route changes, or the loading state changes. */
 	useRoutes = () => {
 		useReact(this.currentRoute_);
 		useReact(this.notFoundRoute_);
 		useReact(this.routeParams_);
-		// eslint-disable-next-line react-hooks/rules-of-hooks
 		for (const route of Object.values(this.routes)) useReact((route as LazySingleLoaderReturn<() => ReactNode>).loadingState);
 		return null;
 	};
@@ -377,11 +377,17 @@ export class Router<RoutePath extends string> {
 	 * The component whose render depends on the current route.
 	 * @param params
 	 * @param params.subPath The subpath of the router to render, i.e. the path of the route layout.
+	 * @param params.useReact Whether to force the component to re-render when the current route changes. (@see {@link useRoutes})
 	 * @returns The component that renders the current route.
 	 */
-	RouterRender = ({ subPath }: { subPath: RoutePathWithSubPaths<PublicRoutePath<RoutePath>> }) => {
+	RouterRender = ({ subPath, useReact }: { subPath: RoutePathWithSubPaths<PublicRoutePath<RoutePath>>; useReact?: boolean }) => {
 		const Component = this.getComponentToRender(subPath) ?? this.NotFoundRouteRender({ subPath });
-		return <Component />;
+		return (
+			<>
+				{useReact && this.useRoutes()}
+				<Component />
+			</>
+		);
 	};
 
 	private NotFoundRouteRender = ({ subPath }: { subPath: RoutePathWithSubPaths<PublicRoutePath<RoutePath>> }) =>
