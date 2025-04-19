@@ -15,7 +15,7 @@ export const MainLayout = () => (
 			</RouteLink>
 		</div>
 		<div style={{ paddingTop: 10 }}>
-			<RouterRender subPath="/" useReact />
+			<RouterRender subPath="/" />
 		</div>
 	</div>
 );

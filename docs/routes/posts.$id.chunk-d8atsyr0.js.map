@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "sources": ["..\\src\\routes\\posts.$id.tsx"],
+  "sourcesContent": [
+    "import { useRouteParams } from \"../routerInstance.gen\";\r\n\r\nexport const PostWithId = () => {\r\n\tconst { id } = useRouteParams(\"/posts/:id\");\r\n\r\n\treturn <div>This is the post: {id}</div>;\r\n};\r\n"
+  ],
+  "mappings": "gJAEa,GAAa,KAAM,CAC/B,IAAQ,MAAO,EAAe,YAAY,EAE1C,OAAO,SAA6B,MAA7B,UAA6B,CAA7B,qBAAwB,IAAxB,qBAA6B",
+  "debugId": "3026EB3E5574E6B864756E2164756E21",
+  "names": []
+}

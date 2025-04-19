@@ -1,3 +1,7 @@
-import { getRouteParams } from "../routerInstance.gen";
+import { useRouteParams } from "../routerInstance.gen";
 
-export const Example = () => <div>Hello {getRouteParams("/example?name").value.name ?? "my friend"}</div>;
+export const Example = () => {
+	const { name } = useRouteParams("/example?name");
+
+	return <div>Hello {name ?? "my friend"}</div>;
+};

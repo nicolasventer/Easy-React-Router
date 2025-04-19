@@ -1,10 +1,10 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-import { batch, effect, signal, type ReadonlySignal, type Signal } from "@preact/signals";
-import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import { useEffect, type ComponentPropsWithoutRef, type ReactNode } from "react";
 import { flushSync } from "react-dom";
-import type { LazySingleLoaderReturn } from "./lazyLoader";
-import { useReact } from "./useReact";
+import type { LazySingleLoaderReturn, LoadingState } from "./lazyLoader";
+import type { PrivateStore } from "./Store";
+import { store } from "./Store";
 
 /**
  * Type to split a path into its parts.
@@ -68,7 +68,7 @@ type PublicRoutePath<RoutePath extends string> = RoutePath extends "/"
  * Type of the parameters of the build link function. `params` is optional if the route has no parameters.
  * @template {string} RoutePath The type of the route paths.
  */
-type BuildLinkParams<RoutePath extends string> = keyof RouteParams<RoutePath> extends never
+export type BuildLinkParams<RoutePath extends string> = keyof RouteParams<RoutePath> extends never
 	? [path: RoutePath]
 	: [path: RoutePath, params: RouteParams<RoutePath>];
 
@@ -109,6 +109,12 @@ type RoutePathWithSubPaths<RoutePath extends string> = {
 		: never;
 }[RoutePath];
 
+export const emptyRouteValue: RouteValue = {
+	load: () => Promise.resolve(),
+	Component: () => null,
+	useLoading: () => "not loaded",
+};
+
 /**
  * Class that handles routing in a React app.
  * @template RoutePath The type of the route paths.
@@ -116,23 +122,26 @@ type RoutePathWithSubPaths<RoutePath extends string> = {
 export class Router<RoutePath extends string> {
 	private routerBaseRoute = "";
 	private useRouteTransition_ = true;
-	private currentRoute_ = signal<PublicRoutePath<RoutePath>>();
-	private notFoundRoute_ = signal<PublicRoutePath<RoutePath>>();
-	private routeParams_ = signal<RouteParams<RoutePath> | {}>({});
+	private currentRoute_: PrivateStore<PublicRoutePath<RoutePath> | undefined> = store<PublicRoutePath<RoutePath>>().private;
+	private notFoundRoute_: PrivateStore<PublicRoutePath<RoutePath> | undefined> = store<PublicRoutePath<RoutePath>>().private;
+	private routeParams_: PrivateStore<RouteParams<RoutePath> | {}> = store<RouteParams<RoutePath> | {}>({}).private;
 	// routes sorted by decreasing ':' then by alphabetical order then by decreasing length
 	private routeRegexes: { path: RoutePath; regex: RegExp; keys: string[]; optionalKeys: string[] }[];
 	private routesParentMap = new Map<RoutePath, PublicRoutePath<RoutePath>>(); // key is a path, value is the parent path
+
+	// Signal that simulates the URL for the router instance. This should start with '/'.
+	private urlStore: PrivateStore<string> | undefined;
 
 	/**
 	 * Creates a new router instance.
 	 * @param routes The routes of the app with their components.
 	 * @param notFoundRoutes The routes of the app that are displayed when the current route is not found.
-	 * @param urlSignal Signal that simulates the URL for the router instance. This should start with '/'.
+	 * @param isGlobal Whether the router is global. If true, the router will use window.location.href to update the current route and will listen to popstate events.
 	 */
 	constructor(
 		private routes: Routes<RoutePath>,
 		private notFoundRoutes: Partial<Routes<RoutePathWithSubPaths<PublicRoutePath<RoutePath>>>>,
-		private urlSignal?: Signal<string>
+		isGlobal: boolean
 	) {
 		this.routeRegexes = Object.keys(routes)
 			.sort((a, b) => {
@@ -177,18 +186,21 @@ export class Router<RoutePath extends string> {
 				}
 			}
 		}
-		if (urlSignal) effect(() => this.updateCurrentRoute());
-		else window.addEventListener("popstate", () => this.updateCurrentRoute());
+		if (isGlobal) window.addEventListener("popstate", () => this.updateCurrentRoute());
+		else this.urlStore = store<string>("").private;
 	}
 
-	/** Hook needed in React that should be called in order to force the re-render when the current route changes, or the loading state changes. */
-	useRoutes = () => {
-		useReact(this.currentRoute_);
-		useReact(this.notFoundRoute_);
-		useReact(this.routeParams_);
-		for (const route of Object.values(this.routes)) useReact((route as LazySingleLoaderReturn<() => ReactNode>).loadingState);
-		return null;
+	/** Returns the URL state of the router, available only if the router is local. */
+	useUrlState = () => {
+		if (!this.urlStore) throw new Error("Router is global");
+		return this.urlStore.useState();
 	};
+
+	/**
+	 * @deprecated (set as deprecated to discourage use) \
+	 * Returns the URL state of the router, available only if the router is local.
+	 */
+	getUrlStore = () => this.urlStore;
 
 	/** Sets the base route of the router, should be called in the root file of the app (that call render and import the Main Layout component). */
 	setRouterBaseRoute = (value: string) => {
@@ -202,9 +214,9 @@ export class Router<RoutePath extends string> {
 
 	/** Updates the current route based on the current URL. It is called automatically when the app starts and when {@link navigateToRouteFn} is called. */
 	updateCurrentRoute = () => {
-		const urlSignalSlash = this.urlSignal?.value?.startsWith("/") ? "" : "/";
-		const url = this.urlSignal?.value
-			? new URL(`http://x${this.routerBaseRoute}${urlSignalSlash}${this.urlSignal.value}`)
+		const urlSignalSlash = this.urlStore?.value?.startsWith("/") ? "" : "/";
+		const url = this.urlStore?.value
+			? new URL(`http://x${this.routerBaseRoute}${urlSignalSlash}${this.urlStore.value}`)
 			: new URL(window.location.href);
 		const path = url.pathname.replace(this.routerBaseRoute, "").replace(/\/$/, "") || "/";
 		let routeRegex = this.routeRegexes.find(
@@ -232,26 +244,55 @@ export class Router<RoutePath extends string> {
 		this.routeParams_.value = routeParams ?? {};
 	};
 
-	/** The current route of the app. It is set to undefined if the route is not found (see {@link notFoundRoute}). */
-	currentRoute = this.currentRoute_ as ReadonlySignal<PublicRoutePath<RoutePath>>;
+	/** Returns the current route and the not found route and a function to check if a route is visible. */
+	useCurrentRoute = () => ({
+		currentRoute: this.currentRoute_.use(),
+		notFoundRoute: this.notFoundRoute_.use(),
+		isRouteVisible: this.isRouteVisible,
+	});
 
-	/** The route that is displayed when the current route is not found. */
-	notFoundRoute = this.notFoundRoute_ as ReadonlySignal<PublicRoutePath<RoutePath>>;
+	/**
+	 * @deprecated (set as deprecated to discourage use) \
+	 * Returns the current route store.
+	 */
+	getCurrentRouteStore = () => this.currentRoute_;
+
+	/**
+	 * @deprecated (set as deprecated to discourage use) \
+	 * Returns the not found route store.
+	 */
+	getNotFoundRouteStore = () => this.notFoundRoute_;
 
 	/** The parameters of the current route. */
-	getRouteParams = <T extends PublicRoutePath<RoutePath>>(_: T) => this.routeParams_ as ReadonlySignal<RouteParams<T>>;
+	useRouteParams = <T extends PublicRoutePath<RoutePath>>(_: T) => this.routeParams_.use() as RouteParams<T>;
 
-	/** Whether the current route is visible. */
+	/**
+	 * @deprecated (set as deprecated to discourage use) \
+	 * Returns the parameters of the current route.
+	 */
+	getRouteParams = <T extends PublicRoutePath<RoutePath>>(_: T) => this.routeParams_.value as RouteParams<T>;
+
+	/**
+	 * @deprecated (set as deprecated to discourage use) \
+	 * Whether the current route is visible.
+	 */
 	isRouteVisible = <T extends PublicRoutePath<RoutePath>>(path: T) =>
 		path === "/" || path.startsWith("?")
 			? (this.currentRoute_.value ?? this.notFoundRoute_.value) === path
 			: (this.currentRoute_.value ?? this.notFoundRoute_.value)?.startsWith(path);
 
-	/** Whether the current route is loading. */
-	isRouteLoading = (path: PublicRoutePath<RoutePath>) => this.routes[path as RoutePath]?.loadingState.value === "loading";
+	useLoadingState = () => {
+		const loadingState = Object.fromEntries(
+			Object.entries(this.routes).map(([path, route]) => [path, (route as RouteValue).useLoading()])
+		) as Record<RoutePath, LoadingState>;
 
-	/** Whether the current route is loaded. */
-	isRouteLoaded = (path: PublicRoutePath<RoutePath>) => this.routes[path as RoutePath]?.loadingState.value === "loaded";
+		return {
+			/** Whether the route is loading. */
+			isRouteLoading: (path: PublicRoutePath<RoutePath>) => loadingState[path as RoutePath] === "loading",
+			/** Whether the route is loaded. */
+			isRouteLoaded: (path: PublicRoutePath<RoutePath>) => loadingState[path as RoutePath] === "loaded",
+		};
+	};
 
 	/** Builds a link to a route. */
 	buildRouteLink = <T extends PublicRoutePath<RoutePath>>(...params: BuildLinkParams<T>) => {
@@ -298,13 +339,11 @@ export class Router<RoutePath extends string> {
 			ev?.preventDefault();
 			const navigateFn = () => {
 				const [path, p] = params;
-				batch(() => {
-					this.currentRoute_.value = path;
-					this.routeParams_.value = p ?? {};
-				});
+				this.currentRoute_.value = path;
+				this.routeParams_.value = p ?? {};
 				const link = this.buildRouteLink(...(params as BuildLinkParams<T>));
 				const link2 = link === "//" ? "/" : link; // this is a hack
-				if (this.urlSignal) this.urlSignal.value = link2;
+				if (this.urlStore) this.urlStore.value = link2;
 				else window.history.pushState({}, "", link2 || "/");
 			};
 			if (this.useRouteTransition_) document.startViewTransition(() => flushSync(navigateFn));
@@ -319,7 +358,7 @@ export class Router<RoutePath extends string> {
 	navigateToCustomRouteFn = (url: string) => (ev?: { preventDefault: () => void }) => {
 		ev?.preventDefault();
 		const navigateFn = () => {
-			if (this.urlSignal) this.urlSignal.value = url;
+			if (this.urlStore) this.urlStore.value = url;
 			else {
 				window.history.pushState({}, "", url);
 				this.updateCurrentRoute();
@@ -377,17 +416,14 @@ export class Router<RoutePath extends string> {
 	 * The component whose render depends on the current route.
 	 * @param params
 	 * @param params.subPath The subpath of the router to render, i.e. the path of the route layout.
-	 * @param params.useReact Whether to force the component to re-render when the current route changes. (@see {@link useRoutes})
 	 * @returns The component that renders the current route.
 	 */
-	RouterRender = ({ subPath, useReact }: { subPath: RoutePathWithSubPaths<PublicRoutePath<RoutePath>>; useReact?: boolean }) => {
+	RouterRender = ({ subPath }: { subPath: RoutePathWithSubPaths<PublicRoutePath<RoutePath>> }) => {
+		const url = this.urlStore?.use();
+		this.currentRoute_.use();
+		useEffect(() => void (this.urlStore && this.updateCurrentRoute()), [url]);
 		const Component = this.getComponentToRender(subPath) ?? this.NotFoundRouteRender({ subPath });
-		return (
-			<>
-				{useReact && this.useRoutes()}
-				<Component />
-			</>
-		);
+		return <Component />;
 	};
 
 	private NotFoundRouteRender = ({ subPath }: { subPath: RoutePathWithSubPaths<PublicRoutePath<RoutePath>> }) =>

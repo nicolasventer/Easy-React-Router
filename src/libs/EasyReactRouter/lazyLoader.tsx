@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { type ReadonlySignal, signal } from "@preact/signals";
-import { type FunctionComponent, useEffect } from "react";
-import { useReact } from "./useReact";
+import type { ComponentType } from "react";
+import { useEffect } from "react";
+import { store } from "./Store";
 
-type FCKeys<T extends object> = { [K in keyof T]: T[K] extends FunctionComponent<any> ? K : never }[keyof T];
+type FCKeys<T extends object> = { [K in keyof T]: T[K] extends ComponentType<any> ? K : never }[keyof T];
 
-/** The possible states of a loading operation. */
-export type LoadingState = "notStarted" | "loading" | "loaded";
+/** The type of the loading state. */
+export type LoadingState = "not loaded" | "loading" | "loaded";
 
 /**
  * A function that returns an object with functions to load and get components and with the loading state.
@@ -15,12 +15,12 @@ export type LoadingState = "notStarted" | "loading" | "loaded";
  * @returns the object with the functions and the loading state
  */
 export const lazyLoader = <T extends object>(importFn: () => Promise<T>) => {
-	const loadingState = signal<LoadingState>("notStarted");
-	const allModules = signal<T | null>(null);
+	const loadingState = store<LoadingState>("not loaded").private;
+	const allModules = store<T | null>(null).private;
 
 	const load = () => {
 		if (allModules.value) return Promise.resolve(allModules.value);
-		if (loadingState.value === "notStarted") loadingState.value = "loading";
+		if (loadingState.value === "not loaded") loadingState.value = "loading";
 		return importFn().then((m) => {
 			loadingState.value = "loaded";
 			allModules.value = m;
@@ -28,11 +28,13 @@ export const lazyLoader = <T extends object>(importFn: () => Promise<T>) => {
 		});
 	};
 
-	const getComponent = <U extends FCKeys<T>>(key: U) =>
+	const useLoading = () => loadingState.use();
+
+	const getComponent = <U extends FCKeys<T>>(key: U, fallback?: () => React.ReactNode) =>
 		((params: unknown) => {
-			useReact(allModules);
+			const allModules_ = allModules.use();
 			useEffect(() => void load(), []);
-			const M = allModules.value ? allModules.value[key] : () => null;
+			const M = allModules_ ? allModules_[key] : fallback ?? (() => null);
 			// @ts-expect-error the type of the component and of the parameters are unknown
 			return <M {...params} />;
 		}) as T[U];
@@ -42,8 +44,8 @@ export const lazyLoader = <T extends object>(importFn: () => Promise<T>) => {
 		getComponent,
 		/** The function to load the module. */
 		load,
-		/** The loading state. */
-		loadingState: loadingState as ReadonlySignal<LoadingState>,
+		/** Hook to get the loading state. */
+		useLoading,
 	};
 };
 
@@ -56,8 +58,8 @@ export type LazySingleLoaderReturn<T> = {
 	Component: T;
 	/** The function to load the module. */
 	load: () => Promise<unknown>;
-	/** The loading state. */
-	loadingState: ReadonlySignal<LoadingState>;
+	/** Hook to get the loading state. */
+	useLoading: () => LoadingState;
 };
 
 /**
@@ -66,12 +68,14 @@ export type LazySingleLoaderReturn<T> = {
  * @template {FCKeys<T>} U the key of the function component
  * @param importFn the function that imports the module
  * @param key the key of the function component
+ * @param fallback the fallback component to render while the module is loading
  * @returns the object with the component, the function and the loading state
  */
 export const lazySingleLoader = <T extends object, U extends FCKeys<T>>(
 	importFn: () => Promise<T>,
-	key: U
+	key: U,
+	fallback?: () => React.ReactNode
 ): LazySingleLoaderReturn<T[U]> => {
-	const { getComponent, load, loadingState } = lazyLoader(importFn);
-	return { Component: getComponent(key), load, loadingState };
+	const { getComponent, load, useLoading } = lazyLoader(importFn);
+	return { Component: getComponent(key, fallback), load, useLoading };
 };

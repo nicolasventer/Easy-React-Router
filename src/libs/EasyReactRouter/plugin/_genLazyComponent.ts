@@ -25,8 +25,6 @@ If file path is not provided, all files in the src directory will be processed.
 
 const argFilePath = Bun.argv.filter((arg) => arg.startsWith("--"))[2] || "*";
 
-const eslintDisableWarning = Bun.argv.includes("--eslint-disable-warning");
-
 const bForce = Bun.argv.includes("--force");
 
 const formatFile = async (filePath: string) => {
@@ -57,26 +55,21 @@ const formatFile = async (filePath: string) => {
 				isDefaultRouteExport = isRouteExport;
 			}
 		}
-		const notLazyFileContent =
-			`${eslintDisableWarning ? "/* eslint-disable react-refresh/only-export-components */\n" : ""}` +
-			`import { lazyLoader } from "easy-react-router";
+		const fileNameNoExtNoLazyWithUpperCase = fileNameNoExtNoLazy.charAt(0).toUpperCase() + fileNameNoExtNoLazy.slice(1);
+		const notLazyFileContent = `import { lazyLoader } from "easy-react-router";
 
-const ${fileNameNoExtNoLazy}LazyLoader = lazyLoader(() => import("./${fileNameNoExtNoLazy}.lazy"));
-/** The function to load the module. */
-export const load = ${fileNameNoExtNoLazy}LazyLoader.load;
-/** The loading state. */
-export const loadingState = ${fileNameNoExtNoLazy}LazyLoader.loadingState;
+export const ${fileNameNoExtNoLazyWithUpperCase}LazyLoader = lazyLoader(() => import("./${fileNameNoExtNoLazy}.lazy"));
 ${exportList
 	.map(
 		(exp) =>
 			`${exp.isRouteExport ? "// @routeExport\n" : ""}` +
-			`export const ${exp.exportName} = ${fileNameNoExtNoLazy}LazyLoader.getComponent("${exp.exportName}");`
+			`export const ${exp.exportName} = ${fileNameNoExtNoLazyWithUpperCase}LazyLoader.getComponent("${exp.exportName}");`
 	)
 	.join("\n")}
 ${
 	hasDefaultExport
 		? `${isDefaultRouteExport ? "// @routeExport\n" : ""}` +
-		  `const default_ = ${fileNameNoExtNoLazy}LazyLoader.getComponent("default");\nexport default default_;`
+		  `const default_ = ${fileNameNoExtNoLazyWithUpperCase}LazyLoader.getComponent("default");\nexport default default_;`
 		: ""
 }`;
 

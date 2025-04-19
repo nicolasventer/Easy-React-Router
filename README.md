@@ -2,8 +2,6 @@
 
 `Easy-React-Router` is an implementation of a file based Router for React.
 
-_(It also works with Preact.)_
-
 This project also includes [`Lazy-Component-Loader`](#lazy-component-loader) which automatically changes the import of components to lazy imports only by renaming the file with a `.lazy.tsx` extension.
 
 ### [Try it online](https://nicolasventer.github.io/Easy-React-Router/)
@@ -157,18 +155,17 @@ await genLazyComponent(); // generate the lazy components
 
 - `RouterRender`: Component that renders the current route. Parameter `subPath` is used to specify the layout to use (and the routes to render).
 - `navigateToRouteFn`: Function to navigate to a route, using the current useTransition setting.
-- `getRouteParams`: Function to get the current route parameters.
-- `currentRoute`: Getter to get the current route.
+- `useRouteParams`: Hook to get the current route parameters.
+- `useCurrentRoute`: Hook to get the current route, the current not found route, and the `isRouteVisible` function.
 - `RouterPathType`: Type of the path of the routes (only the public ones).
 - `RouterParamsType`: Type of the parameters of a route.
-- `useRoutes`: Hook to force the re-render of a component that renders depending on the current route or loading state.
 - `setRouterBaseRoute`: Function to set the base route of the router (useful in production when the app is not at the root of the domain).
 - <details>
   <summary>More...</summary>
 
-  - `isRouteLoaded`, `isRouteLoading`, `isRouteVisible`: Functions to check the state of a route.
-  - `notFoundRoute`: Route that is rendered when no route is found.
+  - `useLoadingState`: Hook to get the loading state of the a route.
   - `loadRouteFn`: Function to trigger the loading of a route (could be use on hover for example).
+  - `useUrlState`: Hook to get the current url state, should be used for **local router**.
   - `RouteLink`: Component to create a link to a route.
   - `navigateToCustomRouteFn`: Function to navigate to a custom url and update the current route.
   - `RouteCustomLink`: Component to create a link to a custom url.

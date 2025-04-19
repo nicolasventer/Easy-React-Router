@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "sources": ["..\\src\\routes\\index.tsx"],
+  "sourcesContent": [
+    "import { lazyLoader } from \"easy-react-router\";\n\nexport const IndexLazyLoader = lazyLoader(() => import(\"./index.lazy\"));\n// @routeExport\nexport const MainLayout = IndexLazyLoader.getComponent(\"MainLayout\");\n"
+  ],
+  "mappings": "+FAEO,KAAM,EAAkB,EAAW,IAAa,wCAAe,EAEzD,EAAa,EAAgB,aAAa,YAAY",
+  "debugId": "3BF2839A588845BA64756E2164756E21",
+  "names": []
+}

@@ -1,3 +1,7 @@
-import { getRouteParams } from "../routerInstance.gen";
+import { useRouteParams } from "../routerInstance.gen";
 
-export const IndexWithId = () => <div>Index with id: {getRouteParams("?id").value.id}</div>;
+export const IndexWithId = () => {
+	const { id } = useRouteParams("?id");
+
+	return <div>Index with id: {id}</div>;
+};

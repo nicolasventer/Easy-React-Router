@@ -1,36 +1,40 @@
-import { signal } from "@preact/signals";
-import { Router, lazySingleLoader, useReact } from "easy-react-router";
-import type { FormEventHandler } from "react";
+import { Router, emptyRouteValue, lazySingleLoader } from "easy-react-router";
+import { useEffect, type FormEventHandler } from "react";
 
-const aboutRouterSignal = signal("/");
-const setAboutRouterSignalFn = (value: string) => () => (aboutRouterSignal.value = value);
-const updateAboutRouterSignal: FormEventHandler<HTMLInputElement> = (e) => (aboutRouterSignal.value = e.currentTarget.value);
-
-const AboutRouter = new Router(
+const { RouterRender, useUrlState } = new Router(
 	{
-		"/": lazySingleLoader(() => import("../components/AboutText"), "AboutText"),
+		"/": emptyRouteValue,
 		"//": lazySingleLoader(() => import("../components/AboutText"), "AboutText"),
 		"/counter": lazySingleLoader(() => import("../components/Counter"), "Counter"),
 		"/debounce": lazySingleLoader(() => import("../components/DebounceTextInput"), "DebounceTextInput"),
 	},
 	{},
-	aboutRouterSignal
+	false
 );
 
-export const About = () => (
-	<div>
-		<div>About</div>
+export const About = () => {
+	const [path, setPath] = useUrlState();
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	useEffect(() => setPath("/"), []);
+
+	const setPathFn = (newPath: string) => () => setPath(newPath);
+	const evSetPath: FormEventHandler<HTMLInputElement> = (e) => setPath(e.currentTarget.value);
+
+	return (
 		<div>
-			<input type="text" value={useReact(aboutRouterSignal)} onInput={updateAboutRouterSignal} />
-			<div>Current route: {AboutRouter.currentRoute.value}</div>
+			<div>About</div>
+			<div>
+				<input type="text" value={path} onInput={evSetPath} />
+				<div>Current route: {path}</div>
+			</div>
+			<div>
+				<button onClick={setPathFn("/")}>About</button>
+				<button onClick={setPathFn("/counter")}>Counter</button>
+				<button onClick={setPathFn("/debounce")}>Debounce</button>
+			</div>
+			<div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid black" }}>
+				<RouterRender subPath="/" />
+			</div>
 		</div>
-		<div>
-			<button onClick={setAboutRouterSignalFn("/")}>About</button>
-			<button onClick={setAboutRouterSignalFn("/counter")}>Counter</button>
-			<button onClick={setAboutRouterSignalFn("/debounce")}>Debounce</button>
-		</div>
-		<div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid black" }}>
-			<AboutRouter.RouterRender subPath="/" />
-		</div>
-	</div>
-);
+	);
+};

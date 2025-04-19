@@ -1,3 +1,7 @@
-import { getRouteParams } from "../routerInstance.gen";
+import { useRouteParams } from "../routerInstance.gen";
 
-export const PostWithId = () => <div>This is the post: {getRouteParams("/posts/:id").value.id}</div>;
+export const PostWithId = () => {
+	const { id } = useRouteParams("/posts/:id");
+
+	return <div>This is the post: {id}</div>;
+};

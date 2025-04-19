@@ -9,7 +9,8 @@ if (Bun.argv.includes("--help") || Bun.argv.includes("--usage")) {
 	--html: Generate static routes file and corresponding html files (instead of router instance file)
 		htmlFile: Path to html file to duplicate for each route
 		--overwrite: Overwrite existing static routes file
-	--force: Force generate router instance file`);
+	--force: Force generate router instance file
+	--export-deprecated: Export deprecated functions`);
 	process.exit(0);
 }
 
@@ -264,7 +265,8 @@ if (Bun.argv.includes("--html")) {
 
 	// generate ROUTER_INSTANCE_FILE
 
-	let routerInstanceContent = `// ${hashValue}
+	let routerInstanceContent =
+		`// ${hashValue}
 import { checkValidRoute, lazySingleLoader, type RouteParams, Router } from "easy-react-router";
 
 export const {
@@ -272,21 +274,25 @@ export const {
 	RouteLink,
 	RouterRender,
 	buildRouteLink,
-	/** The current route of the app. It is set to undefined if the route is not found (see {@link notFoundRoute}). */
-	currentRoute,
-	getRouteParams,
-	isRouteLoaded,
-	isRouteLoading,
-	isRouteVisible,
+	useCurrentRoute,
+	useRouteParams,
+	useLoadingState,
+	useUrlState,
 	loadRouteFn,
 	navigateToCustomRouteFn,
 	navigateToRouteFn,
-	/** The route that is displayed when the current route is not found. */
-	notFoundRoute,
 	setRouterBaseRoute,
 	setUseRouteTransition,
-	updateCurrentRoute,
-	useRoutes,
+	updateCurrentRoute,` +
+		(Bun.argv.includes("--export-deprecated")
+			? `
+	getCurrentRouteStore,
+	getNotFoundRouteStore,
+	getRouteParams,
+	getUrlStore,
+	isRouteVisible,`
+			: "") +
+		`
 } = new Router(
 	{\n`;
 
@@ -308,16 +314,16 @@ export const {
 	appendRoutes(false);
 	routerInstanceContent += `\t},\n\t{\n`;
 	appendRoutes(true);
-	routerInstanceContent += `\t}\n);
+	routerInstanceContent += `\t},\n\ttrue\n);
 
 /** The type of the route paths. */
-export type RouterPathType = typeof currentRoute.value;
+export type RouterPathType = NonNullable<ReturnType<typeof useCurrentRoute>["currentRoute"]>;
 /**
  * @template {string} RoutePath
  * Type of the parameters of a route path.
  * \`params\` is optional if the route has no parameters.
  * @example
- * type A = RouteParams<"/a/:b/c?d">; // { b: string; d?: string; }
+ * type A = RouterParamsType<"/a/:b/c?d">; // { b: string; d?: string; }
  */
 export type RouterParamsType<T extends RouterPathType> = RouteParams<T>;
 

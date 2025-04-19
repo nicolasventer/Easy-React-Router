@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "sources": ["..\\src\\components\\Counter.tsx"],
+  "sourcesContent": [
+    "import { lazyLoader } from \"easy-react-router\";\n\nexport const CounterLazyLoader = lazyLoader(() => import(\"./Counter.lazy\"));\nexport const Counter = CounterLazyLoader.getComponent(\"Counter\");\n"
+  ],
+  "mappings": "+FAEO,KAAM,EAAoB,EAAW,IAAa,0CAAiB,EAC7D,EAAU,EAAkB,aAAa,SAAS",
+  "debugId": "24FBB8B332ECEC8164756E2164756E21",
+  "names": []
+}

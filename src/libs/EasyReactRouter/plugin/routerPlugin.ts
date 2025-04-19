@@ -32,17 +32,20 @@ export type GenLazyComponentOptions = {
 	filePath?: string;
 	/** Whether to always generate */
 	force?: boolean;
-	/** Whether to disable eslint warning */
-	eslintDisableWarning?: boolean;
 	/** Whether to show help */
 	help?: boolean;
 	/** Whether to be silent */
 	silent?: boolean;
+	/**
+	 * @deprecated (set as deprecated to discourage use) \
+	 * Whether to export deprecated functions
+	 */
+	exportDeprecated?: boolean;
 };
 
 const getGenLazyComponentCommand = (p?: GenLazyComponentOptions) =>
 	`bun ${path.resolve(__dirname, "_genLazyComponent.ts")} ${p?.filePath ?? ""}${p?.force ? " --force" : ""}` +
-	`${p?.eslintDisableWarning ? " --eslint-disable-warning" : ""}${p?.help ? " --help" : ""}`;
+	`${p?.exportDeprecated ? " --export-deprecated" : ""}${p?.help ? " --help" : ""}`;
 
 /**
  * Generate lazy components
