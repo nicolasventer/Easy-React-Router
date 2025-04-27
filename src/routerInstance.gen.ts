@@ -1,4 +1,4 @@
-// 925bfb6cb770283b793f97edbb1842ba2a4b14468e0861a9055ededdf94793ba
+// c05589d94015e623fbd0f20b1b6ae3cf11adaf50b5dcee0c92795d68a3c2cc26
 import { checkValidRoute, lazySingleLoader, type RouteParams, Router } from "easy-react-router";
 
 export const {
@@ -22,7 +22,7 @@ export const {
 		[checkValidRoute("/hugePage")]: lazySingleLoader(() => import("./routes/hugePage"), "HugePage"),
 		[checkValidRoute("?id")]: lazySingleLoader(() => import("./routes/index$id"), "IndexWithId"),
 		[checkValidRoute("//")]: lazySingleLoader(() => import("./routes/index.index"), "Home"),
-		[checkValidRoute("/")]: lazySingleLoader(() => import("./routes/index"), "MainLayout"),
+		[checkValidRoute("/")]: lazySingleLoader(() => import("./routes/index.lazy"), "MainLayout"),
 		[checkValidRoute("/posts/:id")]: lazySingleLoader(() => import("./routes/posts.$id"), "PostWithId"),
 		[checkValidRoute("/posts/3")]: lazySingleLoader(() => import("./routes/posts.3"), "PostWithId3"),
 		[checkValidRoute("/posts/")]: lazySingleLoader(() => import("./routes/posts.index.index"), "PostWithoutId"),

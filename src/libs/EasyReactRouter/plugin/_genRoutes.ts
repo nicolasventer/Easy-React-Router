@@ -22,6 +22,7 @@ const STATIC_ROUTES_FILE = "staticRoutes.yaml";
 
 type ParseResult = {
 	filePath: string;
+	hasLazyAlterEgo: boolean;
 	error?: { line: number; message: string };
 	routePath?: string;
 	usedExport?: string;
@@ -66,7 +67,8 @@ for (const fileObj of fs.readdirSync(ROUTES_DIR, { recursive: true, withFileType
 	// if filename ends with .lazy.tsx, then ignore it
 	if (fileObj.name.endsWith(".lazy.tsx")) continue;
 
-	const parseResult: ParseResult = { filePath };
+	const hasLazyAlterEgo = fs.existsSync(filePath.replace(/\.tsx$/, ".lazy.tsx"));
+	const parseResult: ParseResult = { filePath, hasLazyAlterEgo };
 
 	const fileContent = await Bun.file(filePath).text();
 	const posToLine = getPosToLineFn(fileContent);
@@ -307,7 +309,9 @@ export const {
 
 			routerInstanceContent +=
 				`\t\t[checkValidRoute("${parseResult.routePath}")]: lazySingleLoader(` +
-				`() => import("./${parseResult.filePath.slice("./src/".length).replace(".tsx", "")}"), "${parseResult.usedExport}"),\n`;
+				`() => import("./${parseResult.filePath
+					.slice("./src/".length)
+					.replace(".tsx", parseResult.hasLazyAlterEgo ? ".lazy" : "")}"), "${parseResult.usedExport}"),\n`;
 		}
 	};
 
