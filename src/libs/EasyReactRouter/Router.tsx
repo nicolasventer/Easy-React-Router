@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-import { useEffect, type ComponentPropsWithoutRef, type ReactNode } from "react";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import { useEffect } from "react";
 import { flushSync } from "react-dom";
 import type { LazySingleLoaderReturn, LoadingState } from "./lazyLoader";
 import type { PrivateStore } from "./Store";
@@ -368,18 +369,21 @@ export class Router<RoutePath extends string> {
 		else navigateFn();
 	};
 
-	/** The component that renders a link to a route. */
+	/**
+	 * The component that renders a link to a route.
+	 * @param props The props of the link component. \
+	 * Default href is buildRouteLink(path, params), onClick is navigateToRouteFn(path, params).
+	 * @returns
+	 */
 	RouteLink = <T extends PublicRoutePath<RoutePath>>({
 		path,
 		params,
 		children,
+		href = this.buildRouteLink(...([path, params] as unknown as BuildLinkParams<T>)),
+		onClick = this.navigateToRouteFn(...([path, params] as unknown as BuildLinkParams<T>)),
 		...props
 	}: LinkProps<T> & ComponentPropsWithoutRef<"a">) => (
-		<a
-			{...props}
-			href={this.buildRouteLink(...([path, params] as unknown as BuildLinkParams<T>))}
-			onClick={this.navigateToRouteFn(...([path, params] as unknown as BuildLinkParams<T>))}
-		>
+		<a {...props} href={href} onClick={onClick}>
 			{children}
 		</a>
 	);
