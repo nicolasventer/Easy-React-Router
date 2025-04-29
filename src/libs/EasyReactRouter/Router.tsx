@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { flushSync } from "react-dom";
 import type { LazySingleLoaderReturn, LoadingState } from "./lazyLoader";
 import type { PrivateStore } from "./Store";
@@ -187,7 +187,11 @@ export class Router<RoutePath extends string> {
 				}
 			}
 		}
-		if (isGlobal) window.addEventListener("popstate", () => this.updateCurrentRoute());
+		if (isGlobal)
+			window.addEventListener("popstate", () => {
+				if (this.useRouteTransition_) document.startViewTransition(() => flushSync(this.updateCurrentRoute));
+				else this.updateCurrentRoute();
+			});
 		else this.urlStore = store<string>("").private;
 	}
 
@@ -417,16 +421,35 @@ export class Router<RoutePath extends string> {
 	};
 
 	/**
+	 * Hook that returns the component to render based on the current route. \
+	 * Unless the rendered component is needed (like for setting key), it is recommended to use {@link RouterRender} instead.
+	 * @param subPath The subpath of the router to render, i.e. the path of the route layout.
+	 * @returns The component that renders the current route.
+	 */
+	useRouteRender = (subPath: RoutePathWithSubPaths<PublicRoutePath<RoutePath>>) => {
+		const url = this.urlStore?.use();
+		const currentRoute = this.currentRoute_.use();
+		useEffect(() => {
+			if (this.urlStore) {
+				this.updateCurrentRoute();
+			}
+		}, [url]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		const Component = useCallback(this.getComponentToRender(subPath) ?? this.NotFoundRouteRender({ subPath }), [
+			currentRoute,
+			subPath,
+		]);
+		return Component;
+	};
+
+	/**
 	 * The component whose render depends on the current route.
 	 * @param params
 	 * @param params.subPath The subpath of the router to render, i.e. the path of the route layout.
 	 * @returns The component that renders the current route.
 	 */
 	RouterRender = ({ subPath }: { subPath: RoutePathWithSubPaths<PublicRoutePath<RoutePath>> }) => {
-		const url = this.urlStore?.use();
-		this.currentRoute_.use();
-		useEffect(() => void (this.urlStore && this.updateCurrentRoute()), [url]);
-		const Component = this.getComponentToRender(subPath) ?? this.NotFoundRouteRender({ subPath });
+		const Component = this.useRouteRender(subPath);
 		return <Component />;
 	};
 

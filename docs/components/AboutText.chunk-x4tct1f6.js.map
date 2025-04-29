@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "sources": ["..\\src\\components\\AboutText.tsx"],
+  "sourcesContent": [
+    "export const AboutText = () => <div>Home about</div>;\r\n"
+  ],
+  "mappings": "qEAAa,EAAY,IAAM,SAAiB,MAAjB,6CAAiB",
+  "debugId": "9AB9A09ED4E32B7E64756E2164756E21",
+  "names": []
+}

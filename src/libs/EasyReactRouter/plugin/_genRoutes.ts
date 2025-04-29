@@ -275,6 +275,7 @@ export const {
 	RouteCustomLink,
 	RouteLink,
 	RouterRender,
+	useRouteRender,
 	buildRouteLink,
 	useCurrentRoute,
 	useRouteParams,
