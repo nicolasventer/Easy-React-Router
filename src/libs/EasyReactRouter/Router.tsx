@@ -4,7 +4,7 @@ import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { useCallback, useEffect } from "react";
 import { flushSync } from "react-dom";
 import type { LazySingleLoaderReturn, LoadingState } from "./lazyLoader";
-import type { PrivateStore } from "./Store";
+import type { Store } from "./Store";
 import { store } from "./Store";
 
 /**
@@ -123,15 +123,15 @@ export const emptyRouteValue: RouteValue = {
 export class Router<RoutePath extends string> {
 	private routerBaseRoute = "";
 	private useRouteTransition_ = true;
-	private currentRoute_: PrivateStore<PublicRoutePath<RoutePath> | undefined> = store<PublicRoutePath<RoutePath>>().private;
-	private notFoundRoute_: PrivateStore<PublicRoutePath<RoutePath> | undefined> = store<PublicRoutePath<RoutePath>>().private;
-	private routeParams_: PrivateStore<RouteParams<RoutePath> | {}> = store<RouteParams<RoutePath> | {}>({}).private;
+	private currentRoute_ = store<PublicRoutePath<RoutePath>>();
+	private notFoundRoute_ = store<PublicRoutePath<RoutePath>>();
+	private routeParams_ = store<RouteParams<RoutePath> | {}>({});
 	// routes sorted by decreasing ':' then by alphabetical order then by decreasing length
 	private routeRegexes: { path: RoutePath; regex: RegExp; keys: string[]; optionalKeys: string[] }[];
 	private routesParentMap = new Map<RoutePath, PublicRoutePath<RoutePath>>(); // key is a path, value is the parent path
 
 	// Signal that simulates the URL for the router instance. This should start with '/'.
-	private urlStore: PrivateStore<string> | undefined;
+	private urlStore: Store<string> | undefined;
 
 	/**
 	 * Creates a new router instance.
@@ -192,7 +192,7 @@ export class Router<RoutePath extends string> {
 				if (this.useRouteTransition_) document.startViewTransition(() => flushSync(this.updateCurrentRoute));
 				else this.updateCurrentRoute();
 			});
-		else this.urlStore = store<string>("").private;
+		else this.urlStore = store<string>("");
 	}
 
 	/** Returns the URL state of the router, available only if the router is local. */

@@ -14,11 +14,13 @@ export type GenRouterInstanceOptions = {
 	help?: boolean;
 	/** Whether to be silent */
 	silent?: boolean;
+	/** Whether to disable the router */
+	disable?: boolean;
 };
 
 const getGenRouterInstanceCommand = (p?: GenRouterInstanceOptions) =>
 	`bun ${path.resolve(__dirname, "_genRoutes.ts")}${p?.json ? " --json" : ""}${p?.force ? " --force" : ""}` +
-	`${p?.help ? " --help" : ""}`;
+	`${p?.help ? " --help" : ""}${p?.disable ? " --disable" : ""}`;
 
 /**
  * Generate the router instance
@@ -36,6 +38,8 @@ export type GenLazyComponentOptions = {
 	help?: boolean;
 	/** Whether to be silent */
 	silent?: boolean;
+	/** Whether to disable the router */
+	disable?: boolean;
 	/**
 	 * @deprecated (set as deprecated to discourage use) \
 	 * Whether to export deprecated functions
@@ -45,7 +49,7 @@ export type GenLazyComponentOptions = {
 
 const getGenLazyComponentCommand = (p?: GenLazyComponentOptions) =>
 	`bun ${path.resolve(__dirname, "_genLazyComponent.ts")} ${p?.filePath ?? ""}${p?.force ? " --force" : ""}` +
-	`${p?.exportDeprecated ? " --export-deprecated" : ""}${p?.help ? " --help" : ""}`;
+	`${p?.exportDeprecated ? " --export-deprecated" : ""}${p?.help ? " --help" : ""}${p?.disable ? " --disable" : ""}`;
 
 /**
  * Generate lazy components
@@ -70,19 +74,25 @@ export type RouterPluginOptions = {
  * @returns The watchers.
  */
 export const routerPlugin = (p?: RouterPluginOptions) => {
-	const routesGenWatcher = watch({
-		pattern: "src/routes/**",
-		command: getGenRouterInstanceCommand({ ...p?.all, ...p?.routes }),
-		silent: p?.routes?.silent ?? p?.all?.silent,
-	});
+	const routesGenWatcher =
+		p?.routes?.disable ?? p?.all?.disable
+			? undefined
+			: watch({
+					pattern: "src/routes/**",
+					command: getGenRouterInstanceCommand({ ...p?.all, ...p?.routes }),
+					silent: p?.routes?.silent ?? p?.all?.silent,
+			  });
 
-	const lazyComponentWatcher = watch({
-		pattern: "src/**/*.{tsx,ts}",
-		command: (filePath) => getGenLazyComponentCommand({ ...p?.all, ...p?.lazyComponent, filePath }),
-		silent: p?.lazyComponent?.silent ?? p?.all?.silent,
-	});
+	const lazyComponentWatcher =
+		p?.lazyComponent?.disable ?? p?.all?.disable
+			? undefined
+			: watch({
+					pattern: "src/**/*.{tsx,ts}",
+					command: (filePath) => getGenLazyComponentCommand({ ...p?.all, ...p?.lazyComponent, filePath }),
+					silent: p?.lazyComponent?.silent ?? p?.all?.silent,
+			  });
 
-	return [routesGenWatcher, lazyComponentWatcher];
+	return [routesGenWatcher, lazyComponentWatcher].filter(Boolean) as (typeof routesGenWatcher)[];
 };
 
 /** Options for generating html routes */

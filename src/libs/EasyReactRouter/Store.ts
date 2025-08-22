@@ -2,13 +2,14 @@
 import type { DependencyList, Dispatch, SetStateAction } from "react";
 import { useCallback, useDebugValue, useEffect, useState } from "react";
 
+/** The type of a value that is not a function */
 export type NotFunction<T> = T extends (...args: unknown[]) => unknown ? never : T;
 
 /**
  * Private global state class. Can be created only using the `store` function.
  * @template T - The type of the global state.
  */
-class PrivateStore_<T extends NotFunction<unknown>> {
+class Store_<T extends NotFunction<unknown>> {
 	private onChange: Dispatch<SetStateAction<T>>[];
 
 	/**
@@ -19,14 +20,6 @@ class PrivateStore_<T extends NotFunction<unknown>> {
 	constructor(private val: T, private debugLabel?: string) {
 		// @ts-expect-error cannot handle the case where T is a function
 		this.onChange = [(v) => void (this.val = typeof v === "function" ? v(this.val) : v)];
-	}
-
-	/**
-	 * @deprecated (set as deprecated to discourage use) \
-	 * Returns the private store.
-	 */
-	public get private() {
-		return this;
 	}
 
 	/**
@@ -46,7 +39,6 @@ class PrivateStore_<T extends NotFunction<unknown>> {
 	}
 
 	/**
-	 * @deprecated (set as deprecated to discourage use) \
 	 * Sets the current value of the global state.
 	 */
 	public setValue = (v: SetStateAction<T>) => this.onChange.forEach((onChange) => onChange(v));
@@ -123,13 +115,16 @@ class PrivateStore_<T extends NotFunction<unknown>> {
 		useEffect(() => effect(newSetS), deps);
 	};
 }
-export type PrivateStore<T> = PrivateStore_<T>;
+
+/** The type of a store */
+export type Store<T> = Store_<T>;
+
 /**
- * Global state class.
+ * Creates a new global state with an undefined value.
  * @template T - The type of the global state.
- * Prevent the use of the `useState` method, (i.e. the access to the set function of the store)
+ * @returns A new global state with an undefined value.
  */
-export type Store<T extends NotFunction<unknown>> = Omit<PrivateStore_<T>, "useState" | "value" | "setValue" | "subscribe">;
+export function store<T extends NotFunction<unknown>>(): Store<T | undefined>;
 /**
  * Creates a new global state.
  * @template T - The type of the global state.
@@ -137,10 +132,9 @@ export type Store<T extends NotFunction<unknown>> = Omit<PrivateStore_<T>, "useS
  * @param debugLabel - The label to use for debugging.
  * @returns A new global state.
  */
-export function store<T extends NotFunction<unknown>>(): Store<T | undefined>;
 export function store<T extends NotFunction<unknown>>(val: T, debugLabel?: string): Store<T>;
 export function store<T extends NotFunction<unknown>>(val?: T, debugLabel?: string) {
-	return new PrivateStore_(val, debugLabel);
+	return new Store_(val, debugLabel);
 }
 
 /**
@@ -150,3 +144,16 @@ export function store<T extends NotFunction<unknown>>(val?: T, debugLabel?: stri
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type TypeOfStore<T extends Store<any>> = T extends Store<infer U> ? U : never;
+
+/**
+ * The type of the state of the deeply nested stores.
+ * @template T - The type to browse
+ * @returns The type of the state of the deeply nested stores.
+ */
+export type DeepTypeOfStore<T> = T extends Store<infer U>
+	? U
+	: T extends Record<string, unknown>
+	? {
+			[K in keyof T]: DeepTypeOfStore<T[K]>;
+	  }
+	: T;

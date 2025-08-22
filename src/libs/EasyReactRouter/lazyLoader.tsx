@@ -15,8 +15,8 @@ export type LoadingState = "not loaded" | "loading" | "loaded";
  * @returns the object with the functions and the loading state
  */
 export const lazyLoader = <T extends object>(importFn: () => Promise<T>) => {
-	const loadingState = store<LoadingState>("not loaded").private;
-	const allModules = store<T | null>(null).private;
+	const loadingState = store<LoadingState>("not loaded");
+	const allModules = store<T | null>(null);
 
 	const load = () => {
 		if (allModules.value) return Promise.resolve(allModules.value);
