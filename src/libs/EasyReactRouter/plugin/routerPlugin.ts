@@ -1,5 +1,8 @@
 import path from "path";
+import { fileURLToPath } from "url";
 import { watch } from "vite-plugin-watch";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /** Type that contains the common properties between two types `A` and `B`. */
 type Common<A, B> = Pick<A, Extract<keyof A, keyof B>>;

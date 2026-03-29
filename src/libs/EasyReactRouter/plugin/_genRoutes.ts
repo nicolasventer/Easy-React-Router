@@ -2,6 +2,9 @@ import Bun from "bun";
 import { hash } from "crypto";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 if (Bun.argv.includes("--help") || Bun.argv.includes("--usage")) {
 	console.log(`Usage: bun _genRoute.ts [--json] [--html [htmlFile] [--overwrite]] [--force]
